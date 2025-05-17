@@ -1,0 +1,77 @@
+[tool.poetry]
+name = "mtgcobuilder-api"
+version = "0.1.0"
+description = "API for MTG Cobuilder"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+fastapi = "^0.110.0"
+uvicorn = "^0.29.0"
+sqlalchemy = "^2.0.28"
+psycopg2-binary = "^2.9.9"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "1.15.0"
+ruff = "0.11.8"
+pre-commit = "^3.6.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = [
+    "ANN",  # flake8-annotations
+    "COM",  # flake8-commas
+    "C90",  # mccabe complexity
+    "DJ",   # django
+    "EXE",  # flake8-executable
+    "T10",  # debugger
+    "TID",  # flake8-tidy-imports
+    "D100",   # ignore missing docs
+    "D101",
+    "D102",
+    "D103",
+    "D104",
+    "D105",
+    "D106",
+    "D107",
+    "D200",
+    "D205",
+    "D212",
+    "D400",
+    "D401",
+    "D415",
+    "E402",   # false positives for local imports
+    "E501",   # line too long
+    "TRY003", # external messages in exceptions are too verbose
+    "TD002",
+    "TD003",
+    "FIX002", # too verbose descriptions of todos
+]
+
+[tool.mypy]
+python_version = "3.13"
+warn_unused_configs = true
+warn_unused_ignores = true
+disallow_untyped_calls = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+ignore_missing_imports = true
+strict_optional = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_return_any = true
+warn_unreachable = true
+show_error_codes = true
+show_column_numbers = true
+pretty = true
