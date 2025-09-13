@@ -27,7 +27,7 @@ jobs:
           poetry install
 
       - name: Run MyPy
-        run: poetry run mypy .
+        run: poetry run mypy . --config-file pyproject.toml
 
   ruff:
     runs-on: ubuntu-latest
@@ -47,4 +47,4 @@ jobs:
           poetry install
 
       - name: Run Ruff
-        run: poetry run ruff check
+        run: poetry run ruff check --config pyproject.toml
