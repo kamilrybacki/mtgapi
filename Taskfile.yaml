@@ -15,12 +15,6 @@ tasks:
     cmds:
       - "{{.FULL_PACKAGER_COMMAND}} install --no-dev"
 
-  enable-pre-commit:
-    desc: Enable pre-commit hooks
-    cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run pre-commit install"
-      - "{{.FULL_PACKAGER_COMMAND}} run pre-commit autoupdate"
-
   initialize-venv:
     desc: Initialize the virtual environment
     cmds:
