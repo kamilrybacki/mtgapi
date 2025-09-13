@@ -1,14 +1,12 @@
-from typing import Generator
-
-import testcontainers.core.config
-import testcontainers.core.waiting_utils
-import testcontainers.core.container
-
-import tests.common.helpers
+from collections.abc import Generator
 
 import pytest
+import testcontainers.core.config
+import testcontainers.core.container
+import testcontainers.core.waiting_utils
 from dependency_injector.containers import DynamicContainer
 
+import tests.common.helpers
 from mtgcobuilderapi.config.wiring import wire_services
 
 pytest_plugins = [

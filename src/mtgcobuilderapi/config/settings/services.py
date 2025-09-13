@@ -3,9 +3,9 @@ from enum import StrEnum
 import environ
 
 from mtgcobuilderapi.config.settings.base import (
-    ServiceConfigurationPrefixes,
-    ServiceAbstractConfigurationBase,
     AsyncHTTPServiceConfigurationBase,
+    ServiceAbstractConfigurationBase,
+    ServiceConfigurationPrefixes,
 )
 
 

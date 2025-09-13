@@ -1,7 +1,7 @@
 import contextlib
 import os
+from collections.abc import Generator
 from enum import StrEnum
-from typing import Generator
 
 import environ
 
@@ -38,7 +38,6 @@ class AsyncHTTPServiceConfigurationBase(ServiceAbstractConfigurationBase):
         help="Number of retries for failed API requests.",
         converter=int,
     )
-    # multiplier = config.retry_wait_multiplier, min = config.retry_wait_min, max = config.retry_wait_max
     exponential_backoff: bool = environ.var(
         default=True,
         help="Use exponential backoff for retries.",

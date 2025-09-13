@@ -1,10 +1,10 @@
 import logging
 import re
 from enum import StrEnum
-from typing import Any, TypedDict, ClassVar
-from sqlalchemy.orm import declarative_base
+from typing import Any, ClassVar, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
+from sqlalchemy.orm import declarative_base
 
 PostgresEntriesBase = declarative_base()
 
@@ -373,7 +373,7 @@ class MTGIOCard(BaseModel):
         description="Layout of the card (e.g., normal, split, flip, double-faced, token, plane, scheme, phenomenon, leveler, vanguard, aftermath)",
         examples=CARD_POSSIBLE_LAYOUTS,
         min_length=1,
-        max_length=len(max(CARD_POSSIBLE_LAYOUTS, key=len) if CARD_POSSIBLE_LAYOUTS else 0),
+        max_length=len(max(CARD_POSSIBLE_LAYOUTS, key=len)) if CARD_POSSIBLE_LAYOUTS else 0,
     )
     rulings: list[MTGCardRuling] = Field(
         default_factory=list,
@@ -418,8 +418,14 @@ class MTGIOCard(BaseModel):
             text=payload.get("text"),
             flavor=payload.get("flavor", ""),
             layout=payload.get("layout", "normal"),
-            rulings=[MTGCardRuling(**ruling) for ruling in payload.get("rulings", [])],
-            foreign_names=[MTGCardAlias(**name) for name in payload.get("foreignNames", [])],
+            rulings=[MTGCardRuling(
+                date=ruling.get("date", ""),
+                text=ruling.get("text", ""),
+            ) for ruling in payload.get("rulings", [])],
+            foreign_names=[MTGCardAlias(
+                name=foreign_name.get("name", ""),
+                language=foreign_name.get("language", ""),
+            ) for foreign_name in payload.get("foreignNames", [])],
             printings=payload.get("printings", []),
             id=payload["id"],
             image_url=payload.get("imageUrl", ""),
@@ -438,8 +444,7 @@ class MTGIOCard(BaseModel):
         if any(len(p) == 0 for p in printings):
             raise ValueError("Printings cannot contain empty strings.")
 
-        unique_printings = sorted(set(map(lambda string: string.upper(), printings)))
-        return unique_printings
+        return sorted({printing.upper() for printing in printings})
 
     @field_validator("mana_cost", mode="after")
     @classmethod
@@ -462,8 +467,7 @@ class MTGIOCard(BaseModel):
         if any(len(name) == 0 for name in names):
             raise ValueError("Names cannot contain empty strings.")
 
-        unique_names = sorted(set(map(lambda string: string.strip(), names)))
-        return unique_names
+        return sorted({name.strip() for name in names})
 
     @property
     def keywords(self) -> list[Keyword]:
@@ -474,11 +478,11 @@ class MTGIOCard(BaseModel):
         """Extract keywords from the card text."""
         if not text:
             return []
-        keywords = []
-        for keyword in Keyword:
-            if keyword.value.lower() in text.lower():
-                keywords.append(keyword)
-        return keywords
+        return [
+            keyword
+            for keyword in Keyword
+            if keyword.value.lower() in text.lower()
+        ]
 
     def __eq__(self, other: object) -> bool:
         """Check equality based on the card's unique identifier."""

@@ -1,7 +1,7 @@
 import abc
 import dataclasses
+
 import httpx
-from typing import Optional
 
 from mtgcobuilderapi.config.settings.base import NullConfiguration
 from mtgcobuilderapi.services.base import AbstractAsyncService
@@ -17,7 +17,7 @@ class Proxy:
     http: str
     https: str
 
-    def to_httpx_proxy(self) -> Optional[httpx.Proxy]:
+    def to_httpx_proxy(self) -> httpx.Proxy | None:
         """
         Convert the Proxy instance to a dictionary suitable for httpx proxy configuration.
 
@@ -68,7 +68,7 @@ class AbstractProxyService(AbstractAsyncService, abc.ABC):
     which can be used to route requests through a proxy server.
     """
 
-    async def get_proxy(self) -> Optional[Proxy]:
+    async def get_proxy(self) -> Proxy | None:
         """
         Get the proxy URL to be used for requests.
 
@@ -83,16 +83,15 @@ class NullProxyService(AbstractProxyService, config=NullConfiguration):
     This is a no-op implementation of the AbstractProxyService.
     """
 
-    async def initialize(self, config: AbstractProxyService) -> None:
+    async def initialize(self, config: AbstractProxyService) -> None:  # type: ignore
         """
         Initialize the NullProxyService.
         This method does not perform any actions as no proxy is used.
 
         :param config: The configuration for the proxy service.
         """
-        pass
 
-    async def get_proxy(self) -> Optional[Proxy]:
+    async def get_proxy(self) -> Proxy | None:
         """
         Return an empty string as no proxy is used.
 

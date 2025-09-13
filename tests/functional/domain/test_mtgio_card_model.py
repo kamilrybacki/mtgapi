@@ -1,14 +1,14 @@
-import pytest
-
-from tests.common.samples import LIGHTNING_BOLT_MTGIO_CARD_DATA
-from mtgcobuilderapi.domain.card import CARD_POSSIBLE_LAYOUTS, MTGIOCard, ManaValue, Keyword
-
-from pydantic import ValidationError
 from typing import Any
+
+import pytest
+from pydantic import ValidationError
+
+from mtgcobuilderapi.domain.card import CARD_POSSIBLE_LAYOUTS, Keyword, ManaValue, MTGIOCard
+from tests.common.samples import LIGHTNING_BOLT_MTGIO_CARD_DATA
 
 
 def test_mtg_iocard_valid() -> None:
-    card = MTGIOCard(**LIGHTNING_BOLT_MTGIO_CARD_DATA)
+    card = MTGIOCard(**LIGHTNING_BOLT_MTGIO_CARD_DATA)  # type: ignore
     for field, expected in LIGHTNING_BOLT_MTGIO_CARD_DATA.items():
         actual = getattr(card, field)
         if field in {"rulings", "foreign_names"} and expected:
@@ -52,7 +52,7 @@ def test_raises_for_empty_printings_list() -> None:
 
 def test_error_for_non_string_printings() -> None:
     with pytest.raises(ValueError, match="All printings must be strings."):
-        MTGIOCard.validate_printings(["Set1", 123, "Set3"])
+        MTGIOCard.validate_printings(["Set1", 123, "Set3"])  # type: ignore
 
 
 def test_error_for_empty_string_in_printings() -> None:

@@ -2,13 +2,13 @@ import io
 import random
 
 import httpx
+import imagehash
+from mtgcobuilderapi.domain.card import MTGCard
+import pytest
 import requests
 from PIL import Image
-import imagehash
 
-import pytest
-
-from mtgcobuilderapi.config.settings.defaults import MTGIO_BASE_URL, MTGIO_API_VERSION
+from mtgcobuilderapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL
 from mtgcobuilderapi.config.settings.services import MTGIOAPIConfiguration
 from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
 from tests.common.samples import TEST_MTGIO_CARD_ID, TEST_MTGIO_CARD_IMAGE
@@ -61,9 +61,11 @@ async def test_getting_card_image(
 ) -> None:
     plains_mtgio_card = await test_mtgio_service.get_card(TEST_MTGIO_CARD_ID)
     assert plains_mtgio_card, "Expected to fetch a valid card"
-    assert plains_mtgio_card.image_url, "Card should have an image URL"
 
-    image_data = await test_mtgio_service.get_card_image(plains_mtgio_card)
+    plains_mtg_card = MTGCard.from_mtgio_card(plains_mtgio_card)
+    assert plains_mtg_card.image_url, "Card should have an image URL"
+
+    image_data = await test_mtgio_service.get_card_image(plains_mtg_card)
     assert image_data, "Expected to fetch card image data"
     assert isinstance(image_data, bytes), "Card image data should be in bytes format"
 

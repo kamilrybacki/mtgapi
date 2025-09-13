@@ -1,12 +1,13 @@
 import contextlib
 import copy
-from typing import Any, Generator
-import random
 import logging
-
 import os
-from testcontainers.postgres import PostgresContainer
+import random
+from collections.abc import Generator
+from typing import Any
+
 import testcontainers.core.config
+from testcontainers.postgres import PostgresContainer
 
 from mtgcobuilderapi.config.settings.base import ServiceConfigurationPrefixes
 from mtgcobuilderapi.domain.card import MTGCard

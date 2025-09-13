@@ -53,6 +53,7 @@ tasks:
     desc: Format the codebase
     cmds:
       - "{{.FULL_PACKAGER_COMMAND}} run ruff format --config pyproject.toml"
+      - "{{.FULL_PACKAGER_COMMAND}} run ruff check --fix --config pyproject.toml >> /dev/null || exit 0"
 
   test:
     desc: Run tests

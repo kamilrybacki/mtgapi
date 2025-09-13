@@ -3,11 +3,11 @@ import re
 import pytest
 from pydantic import BaseModel
 
-from mtgcobuilderapi.common.exceptions import EmptyPydanticModel
+from mtgcobuilderapi.common.exceptions import EmptyPydanticModelError
 from mtgcobuilderapi.domain.card import MTGCard
 from mtgcobuilderapi.domain.conversions import (
-    convert_pydantic_model_to_sqlalchemy_base,
     TypeAnnotationToSQLFieldType,
+    convert_pydantic_model_to_sqlalchemy_base,
 )
 from tests.common.samples import LIGHTNING_BOLT_MTG_CARD_DATA
 
@@ -49,7 +49,7 @@ def test_if_handles_empty_pydantic_model() -> None:
     class EmptyModel(BaseModel):
         pass
 
-    with pytest.raises(EmptyPydanticModel, match=EmptyPydanticModel.__message__):
+    with pytest.raises(EmptyPydanticModelError, match=EmptyPydanticModelError.__message__):
         convert_pydantic_model_to_sqlalchemy_base(EmptyModel)
 
 
@@ -72,7 +72,7 @@ def test_if_data_held_by_both_models_is_equal(caplog: pytest.LogCaptureFixture) 
                 ), f"Field {non_primitive_field_name} should be of type dict, but is not."
     assert hasattr(mtg_card_sql_model, "id")
 
-    original_model_instance = MTGCard(**LIGHTNING_BOLT_MTG_CARD_DATA)
+    original_model_instance = MTGCard(**LIGHTNING_BOLT_MTG_CARD_DATA)  # type: ignore
     sqlalchemy_model_instance = mtg_card_sql_model(**LIGHTNING_BOLT_MTG_CARD_DATA)
 
     for field in MTGCard.model_fields.keys():

@@ -1,8 +1,10 @@
 import abc
 import asyncio
 import dataclasses
+import logging
+from typing import Any, ClassVar
+
 import nest_asyncio
-from typing import Any, ClassVar, Optional
 
 from mtgcobuilderapi.common.exceptions import InvalidServiceDefinitionError
 from mtgcobuilderapi.config.settings.base import ServiceAbstractConfigurationBase
@@ -20,7 +22,7 @@ class AbstractServiceBase(abc.ABC):
         if abc.ABC in cls.__bases__:
             return
 
-        config_model_for_subclass = kwargs["config"] if "config" in kwargs else None
+        config_model_for_subclass = kwargs.get("config")
         if config_model_for_subclass is None:
             raise InvalidServiceDefinitionError(f"Service subclass {cls.__name__} must define a config model.")
 
@@ -31,12 +33,12 @@ class AbstractServiceBase(abc.ABC):
 
         cls.config = config_model_for_subclass
 
-    def _post_init(self, config: ServiceAbstractConfigurationBase) -> None:
+    def _post_init(self, config: ServiceAbstractConfigurationBase) -> None:  # noqa: ARG002
         """
         Post-initialization method that can be overridden by subclasses.
         This method is called after the service has been initialized with the configuration.
         """
-        pass
+        logging.info(f"[Service] Initialized service {self.__class__.__name__}")
 
     @abc.abstractmethod
     def _initialize(self, config: ServiceAbstractConfigurationBase) -> None:
@@ -70,7 +72,7 @@ class AbstractAsyncService(AbstractServiceBase, abc.ABC):
     Abstract class for asynchronous services.
     """
 
-    _loop: Optional[asyncio.AbstractEventLoop] = dataclasses.field(default=None, init=False)
+    _loop: asyncio.AbstractEventLoop | None = dataclasses.field(default=None, init=False)
 
     @abc.abstractmethod
     async def initialize(self, config: ServiceAbstractConfigurationBase) -> None:

@@ -1,9 +1,9 @@
 import abc
 import dataclasses
 import logging
-from typing import Callable, Optional, Coroutine
-from urllib.parse import urljoin
+from collections.abc import Callable, Coroutine
 from typing import Any
+from urllib.parse import urljoin
 
 import httpx
 import tenacity
@@ -22,10 +22,8 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
     """
 
     base_url: str = dataclasses.field(init=False)
-    _proxy_provider: Optional[AbstractProxyService] = dataclasses.field(init=False, repr=False)
-    __client: Optional[Callable[[], Coroutine[None, None, httpx.AsyncClient]]] = dataclasses.field(
-        init=False, repr=False
-    )
+    _proxy_provider: AbstractProxyService | None = dataclasses.field(init=False, repr=False)
+    __client: Callable[[], Coroutine[None, None, httpx.AsyncClient]] | None = dataclasses.field(init=False, repr=False)
     __follow_redirects: bool = dataclasses.field(init=False, default=True)
 
     @abc.abstractmethod
@@ -39,7 +37,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
         raise NotImplementedError("Subclasses must implement this method.")
 
     @abc.abstractmethod
-    def construct_auth(self, config: AsyncHTTPServiceConfigurationBase) -> Optional[httpx.Auth]:
+    def construct_auth(self, config: AsyncHTTPServiceConfigurationBase) -> httpx.Auth | None:
         """
         Construct authentication for the HTTP request.
 
@@ -48,7 +46,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
         """
         raise NotImplementedError("Subclasses must implement this method.")
 
-    def check_rate_limit(self, response: httpx.Response) -> bool:
+    def check_rate_limit(self, response: httpx.Response) -> bool:  # noqa: ARG002
         """
         Check the rate limit of the response.
 
@@ -67,7 +65,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
             return NullProxyService()
         return proxy_service
 
-    async def initialize(self, config: AsyncHTTPServiceConfigurationBase) -> None:
+    async def initialize(self, config: AsyncHTTPServiceConfigurationBase) -> None:  # type: ignore
         self._proxy_provider = self.get_proxy_provider()
         self.__follow_redirects = config.follow_redirects
         retry_strategy = tenacity.retry(
@@ -86,7 +84,23 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
             """
             Create an instance of httpx.AsyncClient with the provided configuration.
             """
+            if self._proxy_provider is None:
+                logging.warning("[HTTP] Proxy provider is not initialized. Using no proxy.")
+                return httpx.AsyncClient(
+                    timeout=httpx.Timeout(config.timeout),
+                    headers=self.construct_headers(config),
+                    auth=self.construct_auth(config),
+                )
             proxy = await self._proxy_provider.get_proxy()
+
+            if proxy is None or (not proxy.http and not proxy.https):
+                logging.info("[HTTP] No proxy configured. Connecting directly.")
+                return httpx.AsyncClient(
+                    timeout=httpx.Timeout(config.timeout),
+                    headers=self.construct_headers(config),
+                    auth=self.construct_auth(config),
+                )
+
             return httpx.AsyncClient(
                 timeout=httpx.Timeout(config.timeout),
                 headers=self.construct_headers(config),
@@ -96,7 +110,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
 
         self.__client = __spawn_client
 
-        setattr(self, "_request", retry_strategy(self._request))
+        self._request = retry_strategy(self._request)  # type: ignore
 
     async def _request(self, verb: str, url: str, override_base: bool = False) -> httpx.Response:
         """

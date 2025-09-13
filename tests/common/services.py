@@ -1,29 +1,27 @@
 import dataclasses
 import logging
-
-from mtgcobuilderapi.config.wiring import wire_services
-from mypy.metastore import random_string
-from fastapi.testclient import TestClient
-from testcontainers.core.container import DockerContainer
-
-import environ
-import pytest
+from collections.abc import Generator
 from unittest.mock import patch
 
+import environ
 import httpx
-from typing import Optional, Generator
+import pytest
+from fastapi.testclient import TestClient
+from mypy.metastore import random_string
+from testcontainers.core.container import DockerContainer
 
 from mtgcobuilderapi.api.main import API
-from mtgcobuilderapi.config.settings.defaults import MTGIO_BASE_URL, MTGIO_API_VERSION, MTGIO_RATE_LIMIT_HEADER
+from mtgcobuilderapi.config.settings.base import (
+    APP_CONFIGURATION_PREFIX,
+    AsyncHTTPServiceConfigurationBase,
+    ServiceAbstractConfigurationBase,
+    ServiceConfigurationPrefixes,
+)
+from mtgcobuilderapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL, MTGIO_RATE_LIMIT_HEADER
+from mtgcobuilderapi.config.wiring import wire_services
 from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
 from mtgcobuilderapi.services.base import AbstractSyncService
 from mtgcobuilderapi.services.http import AbstractAsyncHTTPClientService
-from mtgcobuilderapi.config.settings.base import (
-    AsyncHTTPServiceConfigurationBase,
-    ServiceAbstractConfigurationBase,
-    APP_CONFIGURATION_PREFIX,
-    ServiceConfigurationPrefixes,
-)
 from mtgcobuilderapi.services.proxy import AbstractProxyService, Proxy
 from tests.common.helpers import TemporaryEnvContext
 
@@ -50,7 +48,7 @@ class MockConfiguration(ServiceAbstractConfigurationBase):
 
 
 @dataclasses.dataclass
-class MockService(AbstractSyncService, config=MockConfiguration):  # type: ignore
+class MockService(AbstractSyncService, config=MockConfiguration):
     """
     Mock service class for testing purposes.
     This class is used to simulate a service in tests without affecting the actual service implementation.
@@ -65,7 +63,7 @@ class MockService(AbstractSyncService, config=MockConfiguration):  # type: ignor
         """
         return f"{first_part} - {second_part}"
 
-    def initialize(self, config: MockConfiguration) -> None:
+    def initialize(self, config: MockConfiguration) -> None:  # type: ignore
         """
         Initialize the mock service with the provided configuration.
         """
@@ -93,11 +91,11 @@ def mock_service_environment() -> Generator[None, None, None]:
 class TestHTTPServiceConfiguration(AsyncHTTPServiceConfigurationBase): ...
 
 
-class PokeAPIClientService(AbstractAsyncHTTPClientService, config=TestHTTPServiceConfiguration):  # type: ignore
+class PokeAPIClientService(AbstractAsyncHTTPClientService, config=TestHTTPServiceConfiguration):
     def construct_headers(self, config: AsyncHTTPServiceConfigurationBase) -> dict[str, str]:
         return {"Content-Type": "application/json"}
 
-    def construct_auth(self, config: AsyncHTTPServiceConfigurationBase) -> Optional[httpx.Auth]:
+    def construct_auth(self, config: AsyncHTTPServiceConfigurationBase) -> httpx.Auth | None:
         return None
 
 
@@ -114,7 +112,7 @@ class ThreeProxyConfiguration(ServiceAbstractConfigurationBase):
 
 
 @dataclasses.dataclass
-class ThreeProxyService(AbstractProxyService, config=ThreeProxyConfiguration):  # type: ignore
+class ThreeProxyService(AbstractProxyService, config=ThreeProxyConfiguration):
     """
     A mock proxy service that returns a fixed proxy configuration.
     """
@@ -122,14 +120,14 @@ class ThreeProxyService(AbstractProxyService, config=ThreeProxyConfiguration):  
     _proxy_address: str = dataclasses.field(init=False)
     _auth: str = dataclasses.field(init=False)
 
-    async def initialize(self, config: ThreeProxyConfiguration) -> None:
+    async def initialize(self, config: ThreeProxyConfiguration) -> None:  # type: ignore
         self._proxy_address = f"{config.host}:{config.port}"
         if config.username and config.password:
             self._auth = f"{config.username}:{config.password}@"
         else:
             self._auth = ""
 
-    async def get_proxy(self) -> Optional[Proxy]:
+    async def get_proxy(self) -> Proxy | None:
         """
         Returns a fixed proxy configuration.
         """

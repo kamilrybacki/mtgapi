@@ -1,10 +1,10 @@
+from collections.abc import Generator
+
 import pytest
 
 from mtgcobuilderapi.common.exceptions import InvalidServiceDefinitionError
 from mtgcobuilderapi.config.settings.base import ServiceAbstractConfigurationBase
 from tests.common.services import MOCK_SERVICE_SETTINGS, MockConfiguration, MockService
-
-from typing import Generator
 
 
 @pytest.mark.offline
@@ -18,7 +18,7 @@ def test_configuration_context_manager(mock_service_environment: Generator[None,
 def test_initializing_mock_service(mock_service_environment: Generator[None, None, None]) -> None:
     initialized_mock_service = MockService()
     assert initialized_mock_service.message == MockService.construct_message(
-        MOCK_SERVICE_SETTINGS["mock_setting"], str(MOCK_SERVICE_SETTINGS["another_mock_setting"])
+        MOCK_SERVICE_SETTINGS["mock_setting"], str(MOCK_SERVICE_SETTINGS["another_mock_setting"])  # type: ignore
     )
 
 
@@ -34,7 +34,7 @@ def test_type_error_on_invalid_service_subclass(mock_service_environment: Genera
 
     with pytest.raises(InvalidServiceDefinitionError) as exc_info:
 
-        class AnotherInvalidService(MockService, config="InvalidConfig"):  # type: ignore
+        class AnotherInvalidService(MockService, config="InvalidConfig"):
             ...
 
     assert f"must inherit from {ServiceAbstractConfigurationBase.__name__}" in str(exc_info.value), (

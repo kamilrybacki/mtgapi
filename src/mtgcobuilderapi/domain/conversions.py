@@ -4,11 +4,11 @@ from types import NoneType, UnionType
 from typing import get_args, get_origin
 
 import sqlalchemy
+from pydantic import BaseModel
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeBase
-from pydantic import BaseModel
 
-from mtgcobuilderapi.common.exceptions import EmptyPydanticModel
+from mtgcobuilderapi.common.exceptions import EmptyPydanticModelError
 from mtgcobuilderapi.config.settings.defaults import CONVERTED_PYDANTIC_MODEL_SUFFIX
 
 
@@ -23,12 +23,12 @@ class TypeAnnotationToSQLFieldType(enum.Enum):
     float = sqlalchemy.Float
     bool = sqlalchemy.Boolean
     datetime = sqlalchemy.DateTime
-    bytes = sqlalchemy.String
+    bytes = sqlalchemy.LargeBinary
     list = sqlalchemy.ARRAY
     dict = sqlalchemy.JSON
 
 
-def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[DeclarativeBase]:
+def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[DeclarativeBase]:  # noqa: PLR0912
     """
     Converts a Pydantic model to a SQLAlchemy base model.
 
@@ -36,11 +36,11 @@ def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[De
     :return: SQLAlchemy base model class.
     :raises EmptyPydanticModel: If Pydantic model is empty.
     """
-    _Base = declarative_base(class_registry=dict())
+    base = declarative_base(class_registry={})
 
     column_definitions: dict[str, sqlalchemy.Column] = {}
     if len(model.model_fields.keys()) == 0:
-        raise EmptyPydanticModel
+        raise EmptyPydanticModelError
 
     for field_name, field in model.model_fields.items():
         field_type = field.annotation
@@ -49,7 +49,7 @@ def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[De
             continue
 
         if isinstance(field_type, UnionType):
-            field_type = get_args(field_type)[0]
+            field_type = get_args(field_type)[0]  # type: ignore
 
         try:
             type_name = get_origin(field_type).__name__  # type: ignore
@@ -96,9 +96,9 @@ def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[De
     for column_name, column_type in column_definitions.items():
         setattr(_NewModelColumnsMeta, column_name, column_type)
 
-    class _NewModel(_NewModelColumnsMeta, _Base):
+    class _NewModel(_NewModelColumnsMeta, base):  # type: ignore
         __tablename__ = model.__name__.lower()
-        __table_args__ = {"extend_existing": True}
+        __table_args__ = {"extend_existing": True}  # noqa: RUF012
 
     _NewModel.__name__ = f"{model.__name__}{CONVERTED_PYDANTIC_MODEL_SUFFIX}"
 

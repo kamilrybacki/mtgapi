@@ -2,28 +2,27 @@ import dataclasses
 import logging
 import re
 import urllib.parse
-from typing import Optional
 
 import httpx
 
 from mtgcobuilderapi.config.settings.services import MTGIOAPIConfiguration
-from mtgcobuilderapi.domain.card import MTGIOCard
+from mtgcobuilderapi.domain.card import MTGCard, MTGIOCard
 from mtgcobuilderapi.services.http import AbstractAsyncHTTPClientService
 
 
 @dataclasses.dataclass
-class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfiguration):  # type: ignore
+class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfiguration):
     limit_header: str = dataclasses.field(init=False)
     version: str = dataclasses.field(init=False)
 
-    def _post_init(self, config: MTGIOAPIConfiguration) -> None:
+    def _post_init(self, config: MTGIOAPIConfiguration) -> None:  # type: ignore
         self.limit_header = config.rate_limit_header
         self.version = config.version
 
-    def construct_auth(self, config: MTGIOAPIConfiguration) -> Optional[httpx.Auth]:
+    def construct_auth(self, config: MTGIOAPIConfiguration) -> httpx.Auth | None:  # type: ignore  # noqa: ARG002
         return None
 
-    def construct_headers(self, config: MTGIOAPIConfiguration) -> dict[str, str]:
+    def construct_headers(self, config: MTGIOAPIConfiguration) -> dict[str, str]:  # type: ignore  # noqa: ARG002
         return {}
 
     def check_rate_limit(self, response: httpx.Response) -> bool:
@@ -45,7 +44,7 @@ class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfigurati
 
         if fetch_by_name:
             identifier = (
-                '"{0}"'.format(urllib.parse.quote_plus(str(identifier)))
+                f'"{urllib.parse.quote_plus(str(identifier))}"'
                 if all(c.isalnum() or c.isspace() for c in str(identifier))
                 else identifier
             )
@@ -65,18 +64,19 @@ class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfigurati
 
         return MTGIOCard.from_api_payload(found_card_data) if not raw else found_card_data
 
-    async def get_card_image(self, card: MTGIOCard) -> Optional[bytes]:
+    async def get_card_image(self, card: MTGCard) -> bytes | None:
         """
         Fetches the image of a card from the MTGIO API.
         """
         if not card.image_url:
-            logging.warning(f"[WARNING] Card [[{card.names[0]}]] has no image URL.")
+            logging.warning(f"[WARNING] Card [[{card.name}]] has no image URL.")
             return None
 
         try:
             response = await self.get(url=card.image_url, override_base=True)
             response.raise_for_status()
-            return response.content
-        except httpx.HTTPStatusError as e:
-            logging.error(f"[ERROR] Failed to fetch image for card [[{card.names[0]}]]: {e}")
+        except httpx.HTTPStatusError as card_image_retrieval_error:
+            logging.exception(f"[ERROR] Failed to fetch image for card [[{card.name}]]", exc_info=card_image_retrieval_error)
             return None
+        else:
+            return response.content

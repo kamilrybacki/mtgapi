@@ -69,6 +69,29 @@ ignore = [
     "TD002",
     "TD003",
     "FIX002", # too verbose descriptions of todos
+    "PGH003", # concrete type ignores
+    "UP045",  # for BaseModel use Optional[X] instead of X | None
+    "G004",
+    "EM101",
+    "EM102",
+    "LOG015",
+    "S101",
+    "ASYNC210",
+    "TC001",
+    "SIM102",
+    "PLR0911",
+    "SLF001",
+    "FBT001",
+    "FBT002",
+    "UP046",
+    "D413",
+    "D412",
+]
+exclude = [
+    "*.pyi",  # ignore type stubs
+    "*.ipynb",  # ignore Jupyter notebooks
+    "tests/**",  # ignore tests
+    "make/**",  # ignore types compiler and other build utils
 ]
 
 [tool.mypy]

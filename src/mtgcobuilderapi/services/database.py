@@ -3,18 +3,19 @@ import asyncio
 import atexit
 import dataclasses
 import logging
-from typing import Any, Optional, TypeVar, Sequence
-from pydantic import BaseModel
+from collections.abc import Sequence
+from typing import Any, TypeVar
 
 import sqlalchemy
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncConnection, create_async_engine, async_sessionmaker
+from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
 from mtgcobuilderapi.common.exceptions import DatabaseConnectionError
 from mtgcobuilderapi.config.settings.base import ServiceAbstractConfigurationBase
 from mtgcobuilderapi.config.settings.services import PostgresConfiguration
-from mtgcobuilderapi.services.base import AbstractAsyncService
 from mtgcobuilderapi.domain.conversions import convert_pydantic_model_to_sqlalchemy_base
+from mtgcobuilderapi.services.base import AbstractAsyncService
 
 DatabaseClient = TypeVar("DatabaseClient")
 
@@ -25,7 +26,7 @@ class AbstractDatabaseService(AbstractAsyncService, abc.ABC):
     Abstract class for database services.
     """
 
-    client: Optional[Any] = dataclasses.field(default=None, init=False)
+    client: Any | None = dataclasses.field(default=None, init=False)
 
     async def initialize(self, config: ServiceAbstractConfigurationBase) -> None:
         """
@@ -51,21 +52,18 @@ class AbstractDatabaseService(AbstractAsyncService, abc.ABC):
         """
         Connects to the database using the provided configuration.
         """
-        pass
 
     @abc.abstractmethod
     async def disconnect(self) -> None:
         """
         Disconnects from the database.
         """
-        pass
 
     @abc.abstractmethod
     async def query(self, query: str, *args: Any, **kwargs: Any) -> Any:
         """
         Executes a query against the database and returns the results.
         """
-        pass
 
 
 @dataclasses.dataclass
@@ -74,15 +72,14 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
     PostgresSQL database service using SQLAlchemy as the ORM.
     """
 
-    client: Optional[AsyncConnection] = dataclasses.field(default=None, init=False)
-    session: Optional[async_sessionmaker[AsyncSession]] = dataclasses.field(default=None, init=False)
+    client: AsyncConnection | None = dataclasses.field(default=None, init=False)
+    session: async_sessionmaker[AsyncSession] | None = dataclasses.field(default=None, init=False)
     __models_cache: dict[str, type[DeclarativeBase]] = dataclasses.field(default_factory=dict)
 
     async def connect(self, config: PostgresConfiguration) -> None:  # type: ignore
         """
         Connects to the PostgreSQL database using the provided configuration.
         """
-
         logging.info("[DB] Initializing PostgreSQL connection.")
         engine = create_async_engine(
             url=config.connection_string,
@@ -92,7 +89,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         self.session = async_sessionmaker(bind=self.client)
         logging.info("[DB] PostgreSQL connection established.")
 
-        synchronous_disconnect_handler = lambda: asyncio.run(self.disconnect())
+        synchronous_disconnect_handler = lambda: asyncio.run(self.disconnect())  # noqa: E731
         atexit.register(synchronous_disconnect_handler)
 
     async def disconnect(self) -> None:
@@ -114,7 +111,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
 
         async with self.session.begin() as session:
             query_cast_to_text = sqlalchemy.text(query)
-            result = await session.execute(query_cast_to_text, *args, **kwargs)  # type: ignore
+            result = await session.execute(query_cast_to_text, *args, **kwargs)
             session.expunge_all()
             return result.fetchall()
 
@@ -136,7 +133,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         )
 
         if not self.session:
-            raise RuntimeError("Database session is not initialized.")
+            raise RuntimeError("[DB] Database session is not initialized.")
 
         query = sqlalchemy.select(compatible_object_type)
         if filters:
@@ -148,6 +145,9 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
             return result.scalars().all()
 
     async def insert(self, instance: BaseModel) -> bool:
+        if not self.session:
+            raise RuntimeError("[DB] Database session is not initialized.")
+
         async with self.session.begin() as session:
             connection = await session.connection()
             if instance.__class__.__name__ not in self.__models_cache:
@@ -164,8 +164,9 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
             try:
                 session.add(new_entry)
                 await session.commit()
-                return True
-            except Exception as e:
-                logging.error(f"Failed to insert instance: {e}")
+            except Exception as entry_insertion_error:
+                logging.exception("Failed to insert instance", exc_info=entry_insertion_error)
                 await session.rollback()
                 return False
+            else:
+                return True

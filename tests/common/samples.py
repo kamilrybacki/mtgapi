@@ -1,9 +1,9 @@
 import os
 
 from PIL import Image
+
 from mtgcobuilderapi.domain.card import ManaValue
 from tests.globals import ASSETS_DIRECTORY
-
 
 LIGHTNING_BOLT_MTGIO_CARD_DATA = {
     "names": ["Lightning Bolt"],

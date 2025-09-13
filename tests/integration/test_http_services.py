@@ -1,6 +1,6 @@
 import pytest
 
-from tests.common.services import PokeAPIClientService, TEST_HTTP_SERVICE_BASE_URL, ThreeProxyService
+from tests.common.services import TEST_HTTP_SERVICE_BASE_URL, PokeAPIClientService, ThreeProxyService
 
 
 @pytest.mark.asyncio
