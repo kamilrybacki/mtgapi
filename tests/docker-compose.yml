@@ -1,22 +1,14 @@
 version: '3.8'
 
 services:
-  frontend:
+  api:
     build:
-      context: ../../mtg-cobuilder/frontend
-    ports:
-      - "3000:3000"
-    volumes:
-      - ./frontend:/app
-    command: npm run dev
-
-  backend:
-    build:
-      context: ../../mtg-cobuilder/backend
+      dockerfile: ../deploy/Dockerfile
+      context: ..
     ports:
       - "8000:8000"
     volumes:
-      - ./backend:/app
+      - ./:/app
     command: poetry run uvicorn app.main:app --reload
 
   db:

@@ -7,6 +7,7 @@ tasks:
   install-dev:
     desc: Install development dependencies
     cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} lock"
       - "{{.FULL_PACKAGER_COMMAND}} install --all-groups"
 
   install-prod:
@@ -47,3 +48,36 @@ tasks:
     cmds:
       - "{{.FULL_PACKAGER_COMMAND}} run ruff check --config pyproject.toml"
       - "{{.FULL_PACKAGER_COMMAND}} run mypy . --config-file pyproject.toml"
+
+  format:
+    desc: Format the codebase
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run ruff format --config pyproject.toml"
+
+  test:
+    desc: Run tests
+    env:
+      TESTCONTAINERS_HOST_OVERRIDE: "127.0.0.1"
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run pytest --config-file pyproject.toml -svv"
+
+  test-chosen:
+    desc: Run tests marked as "chosen"
+    env:
+      TESTCONTAINERS_HOST_OVERRIDE: "127.0.0.1"
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run pytest --config-file pyproject.toml -svv -m 'chosen'"
+
+  test-offline:
+    desc: Run tests that can be run offline
+    env:
+      TESTCONTAINERS_HOST_OVERRIDE: "127.0.0.1"
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run pytest --config-file pyproject.toml -svv -m 'offline'"
+
+  start-api:
+    desc: Start the API server
+    dotenv:
+      - .env
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run uvicorn src.mtgcobuilderapi.api.main:api --host 0.0.0.0 --port 8000 --reload --log-level info"
