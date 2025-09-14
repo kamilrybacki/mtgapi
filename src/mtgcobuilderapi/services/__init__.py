@@ -1,7 +1,6 @@
 from enum import StrEnum
 
 
-class InjectedServiceNames(StrEnum):
+class AuxiliaryServiceNames(StrEnum):
     PROXY = "proxy_service"
     DATABASE = "database_service"
-    MTGIO = "mtgio"

@@ -18,11 +18,10 @@ from tests.common.samples import TEST_MTGIO_CARD_ID, TEST_MTGIO_CARD_IMAGE
 async def test_getting_card_data(
     test_cobuilder_api_client: TestClient, test_mtgio_service: MTGIOAPIService, target_id: int
 ) -> None:
-    api_config: APIConfiguration
-    with APIConfiguration.use() as api_config:  # type: ignore
+    with APIConfiguration.use() as config:
         logging.info(f"[TEST] Getting card data for {target_id}")
-        response = test_cobuilder_api_client.get(
-            f"{api_config.root_path}/card/{target_id}",
+        response = await test_cobuilder_api_client.get(
+            f"/card/{target_id}",
         )
         assert response.status_code == 200
         card_from_api_response: MTGCard = MTGCard(**response.json())
@@ -38,11 +37,10 @@ async def test_getting_card_data(
 
 @pytest.mark.asyncio
 async def test_getting_card_image(test_cobuilder_api_client: TestClient, test_mtgio_service: MTGIOAPIService) -> None:
-    api_config: APIConfiguration
-    with APIConfiguration.use() as api_config:  # type: ignore
+    with APIConfiguration.use() as config:
         logging.info("[TEST] Getting card image")
-        response = test_cobuilder_api_client.get(
-            f"{api_config.root_path}/card/{TEST_MTGIO_CARD_ID}/image",
+        response = await test_cobuilder_api_client.get(
+            f"/card/{TEST_MTGIO_CARD_ID}/image",
         )
         assert response.status_code == 200
         assert response.headers["Content-Type"] == "image/webp"

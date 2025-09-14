@@ -10,7 +10,7 @@ import tenacity
 from dependency_injector.wiring import Provide, inject
 
 from mtgcobuilderapi.config.settings.base import AsyncHTTPServiceConfigurationBase
-from mtgcobuilderapi.services import InjectedServiceNames
+from mtgcobuilderapi.services import AuxiliaryServiceNames
 from mtgcobuilderapi.services.base import AbstractAsyncService
 from mtgcobuilderapi.services.proxy import AbstractProxyService, NullProxyService
 
@@ -58,7 +58,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
     @inject
     def get_proxy_provider(
         self,
-        proxy_service: AbstractProxyService = Provide[InjectedServiceNames.PROXY],
+        proxy_service: AbstractProxyService = Provide[AuxiliaryServiceNames.PROXY],
     ) -> AbstractProxyService:
         if AbstractProxyService not in proxy_service.__class__.__bases__:
             logging.error("[HTTP] Injected proxy service is not an instance of AbstractProxyService.")

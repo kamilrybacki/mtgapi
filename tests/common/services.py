@@ -1,16 +1,19 @@
 import dataclasses
 import logging
 from collections.abc import Generator
+from typing import AsyncGenerator
 from unittest.mock import patch
+import pytest_asyncio
 
 import environ
 import httpx
+from mtgcobuilderapi.config.wiring import wire_services
 import pytest
-from fastapi.testclient import TestClient
+from httpx import ASGITransport, AsyncClient
 from mypy.metastore import random_string
 from testcontainers.core.container import DockerContainer
 
-from mtgcobuilderapi.api.main import API
+from mtgcobuilderapi.entrypoint import API
 from mtgcobuilderapi.config.settings.base import (
     APP_CONFIGURATION_PREFIX,
     AsyncHTTPServiceConfigurationBase,
@@ -18,12 +21,11 @@ from mtgcobuilderapi.config.settings.base import (
     ServiceConfigurationPrefixes,
 )
 from mtgcobuilderapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL, MTGIO_RATE_LIMIT_HEADER
-from mtgcobuilderapi.config.wiring import wire_services
 from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
 from mtgcobuilderapi.services.base import AbstractSyncService
 from mtgcobuilderapi.services.http import AbstractAsyncHTTPClientService
 from mtgcobuilderapi.services.proxy import AbstractProxyService, Proxy
-from tests.common.helpers import TemporaryEnvContext
+from tests.common.helpers import TemporaryEnvContext, use_postgres_container
 
 TEST_HTTP_CONFIGURATION_PREFIX = "TEST_HTTP_SERVICE_"
 TEST_HTTP_SERVICE_BASE_URL = "https://pokeapi.co/api/v2/"
@@ -185,7 +187,10 @@ def test_mtgio_service(
         yield initialized_service
 
 
-@pytest.fixture(scope="function")
-def test_cobuilder_api_client() -> TestClient:
-    wire_services()
-    return TestClient(API)
+@pytest_asyncio.fixture(scope="function")
+async def test_cobuilder_api_client() -> AsyncGenerator[AsyncClient, None]:
+    with use_postgres_container():
+        wire_services()
+        full_base_url = f"http://testservers.com/{API.root_path.removeprefix('/')}"
+        async with AsyncClient(transport=ASGITransport(app=API), base_url=full_base_url) as client:
+            yield client

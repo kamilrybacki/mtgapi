@@ -74,7 +74,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
 
     client: AsyncConnection | None = dataclasses.field(default=None, init=False)
     session: async_sessionmaker[AsyncSession] | None = dataclasses.field(default=None, init=False)
-    __models_cache: dict[str, type[DeclarativeBase]] = dataclasses.field(default_factory=dict)
+    _models_cache: dict[str, type[DeclarativeBase]] = dataclasses.field(default_factory=dict)
 
     async def connect(self, config: PostgresConfiguration) -> None:  # type: ignore
         """
@@ -115,6 +115,14 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
             session.expunge_all()
             return result.fetchall()
 
+    async def ensure_table(self, sql_table_model: type[DeclarativeBase]) -> None:
+        if not self.session:
+            raise RuntimeError("[DB] Database session is not initialized.")
+        async with self.session.begin() as session:
+            connection = await session.connection()
+            await connection.run_sync(sql_table_model.metadata.create_all)
+            logging.info(f"[DB] Created new model for {sql_table_model.__name__}")
+
     async def get_objects(
         self, object_type: type[BaseModel] | type[DeclarativeBase], filters: dict[str, Any] | None = None
     ) -> Sequence[DeclarativeBase]:
@@ -150,23 +158,26 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
 
         async with self.session.begin() as session:
             connection = await session.connection()
-            if instance.__class__.__name__ not in self.__models_cache:
-                new_model = convert_pydantic_model_to_sqlalchemy_base(instance.__class__)
-                self.__models_cache[instance.__class__.__name__] = new_model
-                asyncio.run(connection.run_sync(new_model.metadata.create_all))
 
             instance_data = instance.model_dump()
-            new_entry = self.__models_cache[instance.__class__.__name__](**instance_data)
+            new_entry = self._models_cache[instance.__class__.__name__](**instance_data)
 
             if not connection:
-                raise RuntimeError("Database session is not initialized.")
+                raise RuntimeError("[DB] Database session is not initialized.")
 
             try:
                 session.add(new_entry)
                 await session.commit()
             except Exception as entry_insertion_error:
-                logging.exception("Failed to insert instance", exc_info=entry_insertion_error)
+                logging.exception("[DB] Failed to insert instance", exc_info=entry_insertion_error)
                 await session.rollback()
                 return False
             else:
                 return True
+
+    async def register(self, model: type[BaseModel]) -> None:
+        if model.__name__ not in self._models_cache:
+            sql_model = convert_pydantic_model_to_sqlalchemy_base(model)
+            await self.ensure_table(sql_table_model=sql_model)
+            logging.info(f"[DB] Registered model {model.__name__} as {sql_model.__name__}")
+            self._models_cache[model.__name__] = sql_model

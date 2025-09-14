@@ -1,8 +1,10 @@
 import logging
 
+from mtgcobuilderapi.config.wiring import wire_services
+from mtgcobuilderapi.services import AuxiliaryServiceNames
 import pytest
 
-from mtgcobuilderapi.api.middleware.cache import retrieve_card_data_from_cache
+from mtgcobuilderapi.services.cache import retrieve_card_data_from_cache
 from mtgcobuilderapi.domain.card import MTGCard
 from mtgcobuilderapi.services.database import PostgresDatabaseService
 from tests.common.helpers import use_postgres_container
@@ -10,11 +12,11 @@ from tests.common.samples import LIGHTNING_BOLT_MTG_CARD_DATA
 
 
 @pytest.mark.asyncio
-@pytest.mark.chosen
 @pytest.mark.offline
 async def test_getting_existing_cache_entry() -> None:
     with use_postgres_container():
-        postgres_service = PostgresDatabaseService()
+        services = wire_services()
+        postgres_service: PostgresDatabaseService = getattr(services, AuxiliaryServiceNames.DATABASE)()
         target_card_id = LIGHTNING_BOLT_MTG_CARD_DATA.get("id")
         if target_card_id is None:
             raise ValueError("Test data must have an 'id' field. Check test samples.")

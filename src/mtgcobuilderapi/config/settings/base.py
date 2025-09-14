@@ -2,6 +2,7 @@ import contextlib
 import os
 from collections.abc import Generator
 from enum import StrEnum
+from typing import Self
 
 import environ
 
@@ -12,7 +13,7 @@ class ServiceAbstractConfigurationBase:
 
     @classmethod
     @contextlib.contextmanager
-    def use(cls) -> Generator["ServiceAbstractConfigurationBase", None, None]:
+    def use(cls) -> Generator[Self, None, None]:
         """Context manager to use the configuration."""
         yield cls.from_environ(environ=os.environ)  # type: ignore
 
@@ -22,7 +23,7 @@ class NullConfiguration(ServiceAbstractConfigurationBase):
     """Null configuration class that does nothing."""
 
     @classmethod
-    def from_environ(cls, _: dict[str, str]) -> "NullConfiguration":
+    def from_environ(cls, _: dict[str, str]) -> Self:
         """Create a NullConfiguration instance from environment variables."""
         return cls()
 

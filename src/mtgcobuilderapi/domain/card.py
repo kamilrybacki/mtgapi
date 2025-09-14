@@ -418,14 +418,20 @@ class MTGIOCard(BaseModel):
             text=payload.get("text"),
             flavor=payload.get("flavor", ""),
             layout=payload.get("layout", "normal"),
-            rulings=[MTGCardRuling(
-                date=ruling.get("date", ""),
-                text=ruling.get("text", ""),
-            ) for ruling in payload.get("rulings", [])],
-            foreign_names=[MTGCardAlias(
-                name=foreign_name.get("name", ""),
-                language=foreign_name.get("language", ""),
-            ) for foreign_name in payload.get("foreignNames", [])],
+            rulings=[
+                MTGCardRuling(
+                    date=ruling.get("date", ""),
+                    text=ruling.get("text", ""),
+                )
+                for ruling in payload.get("rulings", [])
+            ],
+            foreign_names=[
+                MTGCardAlias(
+                    name=foreign_name.get("name", ""),
+                    language=foreign_name.get("language", ""),
+                )
+                for foreign_name in payload.get("foreignNames", [])
+            ],
             printings=payload.get("printings", []),
             id=payload["id"],
             image_url=payload.get("imageUrl", ""),
@@ -478,11 +484,7 @@ class MTGIOCard(BaseModel):
         """Extract keywords from the card text."""
         if not text:
             return []
-        return [
-            keyword
-            for keyword in Keyword
-            if keyword.value.lower() in text.lower()
-        ]
+        return [keyword for keyword in Keyword if keyword.value.lower() in text.lower()]
 
     def __eq__(self, other: object) -> bool:
         """Check equality based on the card's unique identifier."""
@@ -543,3 +545,6 @@ class MTGCard(BaseModel):
     @classmethod
     def null(cls) -> Any:
         return None
+
+    def __bool__(self) -> bool:
+        return bool(self.id and self.name)

@@ -76,7 +76,9 @@ class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfigurati
             response = await self.get(url=card.image_url, override_base=True)
             response.raise_for_status()
         except httpx.HTTPStatusError as card_image_retrieval_error:
-            logging.exception(f"[ERROR] Failed to fetch image for card [[{card.name}]]", exc_info=card_image_retrieval_error)
+            logging.exception(
+                f"[ERROR] Failed to fetch image for card [[{card.name}]]", exc_info=card_image_retrieval_error
+            )
             return None
         else:
             return response.content

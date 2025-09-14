@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: ./deploy/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      MTGCOBUILDER_DATABASE__CONNECTION_STRING: "postgresql+asyncpg://user:password@db:5432/mydatabase"
+      MTGCOBUILDER_MTGIO__BASE_URL: "https://api.magicthegathering.io"
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydatabase
