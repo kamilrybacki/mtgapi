@@ -18,8 +18,8 @@ def test_configuration_context_manager(mock_service_environment: Generator[None,
 def test_initializing_mock_service(mock_service_environment: Generator[None, None, None]) -> None:
     initialized_mock_service = MockService()
     assert initialized_mock_service.message == MockService.construct_message(
-        MOCK_SERVICE_SETTINGS["mock_setting"],
-        str(MOCK_SERVICE_SETTINGS["another_mock_setting"]),  # type: ignore
+        MOCK_SERVICE_SETTINGS["mock_setting"],  # type: ignore
+        str(MOCK_SERVICE_SETTINGS["another_mock_setting"]),
     )
 
 

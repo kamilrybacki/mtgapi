@@ -3,8 +3,8 @@ import logging
 
 import imagehash
 import pytest
-from fastapi.testclient import TestClient
 from PIL import Image
+from httpx import AsyncClient
 
 from mtgcobuilderapi.config.settings.api import APIConfiguration
 from mtgcobuilderapi.domain.card import MTGCard, MTGIOCard
@@ -16,7 +16,7 @@ from tests.common.samples import TEST_MTGIO_CARD_ID, TEST_MTGIO_CARD_IMAGE
 @pytest.mark.asyncio
 @pytest.mark.parametrize("target_id", generate_random_card_ids(10))  # Example target IDs
 async def test_getting_card_data(
-    test_cobuilder_api_client: TestClient, test_mtgio_service: MTGIOAPIService, target_id: int
+    test_cobuilder_api_client: AsyncClient, test_mtgio_service: MTGIOAPIService, target_id: int
 ) -> None:
     with APIConfiguration.use() as config:
         logging.info(f"[TEST] Getting card data for {target_id}")
@@ -36,7 +36,7 @@ async def test_getting_card_data(
 
 
 @pytest.mark.asyncio
-async def test_getting_card_image(test_cobuilder_api_client: TestClient, test_mtgio_service: MTGIOAPIService) -> None:
+async def test_getting_card_image(test_cobuilder_api_client: AsyncClient, test_mtgio_service: MTGIOAPIService) -> None:
     with APIConfiguration.use() as config:
         logging.info("[TEST] Getting card image")
         response = await test_cobuilder_api_client.get(
