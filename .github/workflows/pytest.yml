@@ -1,5 +1,4 @@
-
-name: pytest
+name: Unit and Integration Tests 
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

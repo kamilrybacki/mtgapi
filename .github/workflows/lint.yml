@@ -1,4 +1,4 @@
-name: Backend Lint and Typecheck
+name: Lint and Typecheck 
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
