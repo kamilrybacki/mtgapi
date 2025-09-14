@@ -1,104 +1,100 @@
-# MTG Cobuilder API
+# MTG Card Info API
 
-An API service that allows users to manage Magic the Gathering collections and build decks with the assistance of an LLM Copilot-like partner.
+This repository provides a small FastAPI-based service for retrieving Magic: The Gathering card information and related utilities used in tests and integrations.
 
-## Features
+The codebase focuses on backend HTTP services, domain models for MTG cards, and service integrations (external APIs, cache, and database adapters). It is not a full user-facing deck-building product.
 
-- Manage your Magic the Gathering card collections
-- Build and optimize decks with AI assistance
-- Track your card inventory
-- Get intelligent recommendations for deck improvements
-- Analyze deck performance and statistics
+## Key packages and layout
 
-## Tech Stack
+- Python 3.12
+- FastAPI for the HTTP layer (in `src/mtgcobuilderapi`)
+- Modular services under `src/mtgcobuilderapi/services` (http clients, proxy, cache, database)
+- Domain models under `src/mtgcobuilderapi/domain` (card, conversions)
+- Config and wiring in `src/mtgcobuilderapi/config`
 
-- **Python 3.12**
-- **FastAPI**: Modern, fast web framework for building APIs
-- **SQLAlchemy**: SQL toolkit and Object-Relational Mapping
-- **PostgreSQL**: Database for storing card and user data
-- **Uvicorn**: ASGI server for running the API
+## Quick start (development)
 
-## Getting Started
+1. Install dependencies with Poetry:
 
-### Prerequisites
+```bash
+poetry install
+```
 
-- Python 3.12 or higher
-- Poetry package manager
-- PostgreSQL database
+1. Run the test suite (recommended before running):
 
-### Installation
+```bash
+poetry run pytest -q
+```
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/mtgcobuilder-api.git
-   cd mtgcobuilder-api
-   ```
+1. Start the app (module path depends on how you run the package). A common pattern in this repo is to run the entrypoint module:
 
-2. Initialize the project using Task:
-   ```bash
-   task init-project
-   ```
-   This will:
-   - Create a virtual environment
-   - Install all dependencies
-   - Set up pre-commit hooks
+```bash
+poetry run python -m mtgcobuilderapi.entrypoint
+```
 
-3. For production environments:
-   ```bash
-   task install-prod
-   ```
+If you prefer Uvicorn directly, point it at the ASGI app module used in `entrypoint.py`.
 
-### Development Setup
+## API docs
 
-The project uses several development tools:
+When the server is running locally, the FastAPI interactive docs are typically available at:
 
-- **Ruff**: For linting and formatting
-- **MyPy**: For static type checking
-- **Pre-commit**: For running checks before commits
+- Swagger UI: [http://localhost:8000/docs](http://localhost:8000/docs)
+- ReDoc: [http://localhost:8000/redoc](http://localhost:8000/redoc)
 
-To run linters:
+## Testing and Docker
+
+- Tests are in the `tests/` folder and include unit, integration, and functional suites. Use `pytest` to run them.
+- A Dockerfile and docker-compose are included under `deploy/` for containerized runs and in-repo integration testing. See `deploy/docker-compose.yaml` and `deploy/Dockerfile`.
+
+### Taskfile (developer tasks)
+
+This project includes a `Taskfile.yaml` with convenient developer tasks. Common commands (run from the repository root):
+
+- Install development dependencies (creates/uses the in-project virtualenv configured by the Taskfile):
+
+```bash
+task install-dev
+```
+
+- Install production dependencies only:
+
+```bash
+task install-prod
+```
+
+- Initialize the project (venv + install + pre-commit):
+
+```bash
+task init-project
+```
+
+- Run linters and type checks (ruff + mypy):
+
 ```bash
 task lint
 ```
 
-### Running the API
-
-To start the development server:
-```bash
-poetry run uvicorn src.main:app --reload
-```
-
-The API will be available at `http://localhost:8000`.
-
-## API Documentation
-
-Once the server is running, you can access the interactive API documentation:
-
-- Swagger UI: `http://localhost:8000/docs`
-- ReDoc: `http://localhost:8000/redoc`
-
-## Docker Deployment
-
-A Docker Compose configuration is available in the `tests` directory for testing the full stack:
+- Run the full test suite:
 
 ```bash
-cd tests
-docker-compose up
+task test
 ```
 
-This will start:
-- The frontend application on port 3000
-- The backend API on port 8000
-- A PostgreSQL database on port 5432
+- Start the API with docker-compose (uses `deploy/docker-compose.yaml`):
+
+```bash
+task start-api
+```
+
+## Notes and caveats
+
+- The project contains utilities and fixtures used by the test suite (see `tests/conftest.py` and `tests/globals.py`).
+- This README intentionally stays focused on running and testing the service; see inline docs and module docstrings for implementation details.
 
 ## Contributing
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+If you'd like to contribute, open issues or pull requests. Keep tests green and follow repository linting rules (Taskfile contains developer commands such as `task lint`).
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT
