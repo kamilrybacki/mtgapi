@@ -71,7 +71,7 @@ class AsyncHTTPServiceConfigurationBase(ServiceAbstractConfigurationBase):
     )
 
 
-APP_CONFIGURATION_PREFIX = "MTGCOBUILDER"
+APP_CONFIGURATION_PREFIX = "MTGAPI"
 
 
 class ServiceConfigurationPrefixes(StrEnum):

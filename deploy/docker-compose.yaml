@@ -8,8 +8,8 @@ services:
     ports:
       - "8000:8000"
     environment:
-      MTGCOBUILDER_DATABASE__CONNECTION_STRING: "postgresql+asyncpg://user:password@db:5432/mydatabase"
-      MTGCOBUILDER_MTGIO__BASE_URL: "https://api.magicthegathering.io"
+      MTGAPI_DATABASE__CONNECTION_STRING: "postgresql+asyncpg://user:password@db:5432/mydatabase"
+      MTGAPI_MTGIO__BASE_URL: "https://api.magicthegathering.io"
     depends_on:
       - db
 

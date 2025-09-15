@@ -7,10 +7,10 @@ The codebase focuses on backend HTTP services, domain models for MTG cards, and 
 ## Key packages and layout
 
 - Python 3.12
-- FastAPI for the HTTP layer (in `src/mtgcobuilderapi`)
-- Modular services under `src/mtgcobuilderapi/services` (http clients, proxy, cache, database)
-- Domain models under `src/mtgcobuilderapi/domain` (card, conversions)
-- Config and wiring in `src/mtgcobuilderapi/config`
+- FastAPI for the HTTP layer (in `src/mtgapi`)
+- Modular services under `src/mtgapi/services` (http clients, proxy, cache, database)
+- Domain models under `src/mtgapi/domain` (card, conversions)
+- Config and wiring in `src/mtgapi/config`
 
 ## Quick start (development)
 
@@ -29,7 +29,7 @@ poetry run pytest -q
 1. Start the app (module path depends on how you run the package). A common pattern in this repo is to run the entrypoint module:
 
 ```bash
-poetry run python -m mtgcobuilderapi.entrypoint
+poetry run python -m mtgapi.entrypoint
 ```
 
 If you prefer Uvicorn directly, point it at the ASGI app module used in `entrypoint.py`.

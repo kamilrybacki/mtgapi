@@ -6,8 +6,8 @@ from typing import Any, ClassVar
 
 import nest_asyncio
 
-from mtgcobuilderapi.common.exceptions import InvalidServiceDefinitionError
-from mtgcobuilderapi.config.settings.base import ServiceAbstractConfigurationBase
+from mtgapi.common.exceptions import InvalidServiceDefinitionError
+from mtgapi.config.settings.base import ServiceAbstractConfigurationBase
 
 
 @dataclasses.dataclass

@@ -3,9 +3,9 @@ import re
 import pytest
 from pydantic import BaseModel
 
-from mtgcobuilderapi.common.exceptions import EmptyPydanticModelError
-from mtgcobuilderapi.domain.card import MTGCard
-from mtgcobuilderapi.domain.conversions import (
+from mtgapi.common.exceptions import EmptyPydanticModelError
+from mtgapi.domain.card import MTGCard
+from mtgapi.domain.conversions import (
     TypeAnnotationToSQLFieldType,
     convert_pydantic_model_to_sqlalchemy_base,
 )

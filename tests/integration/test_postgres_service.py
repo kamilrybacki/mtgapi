@@ -1,6 +1,6 @@
 import pytest
 
-from mtgcobuilderapi.services.database import PostgresDatabaseService
+from mtgapi.services.database import PostgresDatabaseService
 from tests.common.helpers import use_postgres_container
 
 

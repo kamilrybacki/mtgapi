@@ -11,11 +11,11 @@ from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
-from mtgcobuilderapi.common.exceptions import DatabaseConnectionError
-from mtgcobuilderapi.config.settings.base import ServiceAbstractConfigurationBase
-from mtgcobuilderapi.config.settings.services import PostgresConfiguration
-from mtgcobuilderapi.domain.conversions import convert_pydantic_model_to_sqlalchemy_base
-from mtgcobuilderapi.services.base import AbstractAsyncService
+from mtgapi.common.exceptions import DatabaseConnectionError
+from mtgapi.config.settings.base import ServiceAbstractConfigurationBase
+from mtgapi.config.settings.services import PostgresConfiguration
+from mtgapi.domain.conversions import convert_pydantic_model_to_sqlalchemy_base
+from mtgapi.services.base import AbstractAsyncService
 
 DatabaseClient = TypeVar("DatabaseClient")
 

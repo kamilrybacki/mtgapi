@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from mtgcobuilderapi.domain.card import CARD_POSSIBLE_LAYOUTS, Keyword, ManaValue, MTGIOCard
+from mtgapi.domain.card import CARD_POSSIBLE_LAYOUTS, Keyword, ManaValue, MTGIOCard
 from tests.common.samples import LIGHTNING_BOLT_MTGIO_CARD_DATA
 
 

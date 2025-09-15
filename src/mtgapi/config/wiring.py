@@ -4,13 +4,13 @@ import logging
 from dependency_injector.containers import DynamicContainer
 from dependency_injector.providers import Singleton
 
-from mtgcobuilderapi.services import AuxiliaryServiceNames
-from mtgcobuilderapi.services.database import PostgresDatabaseService
-from mtgcobuilderapi.services.proxy import NullProxyService
+from mtgapi.services import AuxiliaryServiceNames
+from mtgapi.services.database import PostgresDatabaseService
+from mtgapi.services.proxy import NullProxyService
 
 MODULES_TO_WIRE = [
-    "mtgcobuilderapi.services.http",
-    "mtgcobuilderapi.services.cache",
+    "mtgapi.services.http",
+    "mtgapi.services.cache",
 ]
 
 SERVICES_MAP = {

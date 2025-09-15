@@ -7,7 +7,7 @@ import testcontainers.core.waiting_utils
 from dependency_injector.containers import DynamicContainer
 
 import tests.common.helpers
-from mtgcobuilderapi.config.wiring import wire_services
+from mtgapi.config.wiring import wire_services
 
 pytest_plugins = [
     "tests.common.services",

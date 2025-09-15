@@ -5,9 +5,9 @@ import urllib.parse
 
 import httpx
 
-from mtgcobuilderapi.config.settings.services import MTGIOAPIConfiguration
-from mtgcobuilderapi.domain.card import MTGCard, MTGIOCard
-from mtgcobuilderapi.services.http import AbstractAsyncHTTPClientService
+from mtgapi.config.settings.services import MTGIOAPIConfiguration
+from mtgapi.domain.card import MTGCard, MTGIOCard
+from mtgapi.services.http import AbstractAsyncHTTPClientService
 
 
 @dataclasses.dataclass

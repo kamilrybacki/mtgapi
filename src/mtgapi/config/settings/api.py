@@ -2,8 +2,8 @@ import os
 
 import environ
 
-from mtgcobuilderapi import __version__
-from mtgcobuilderapi.config.settings.base import ServiceAbstractConfigurationBase, ServiceConfigurationPrefixes
+from mtgapi import __version__
+from mtgapi.config.settings.base import ServiceAbstractConfigurationBase, ServiceConfigurationPrefixes
 
 VERSION: str = os.environ.get(f"{ServiceConfigurationPrefixes.API}_VERSION", f"v{__version__.split('.')[0]}")
 

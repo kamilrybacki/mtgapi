@@ -6,9 +6,9 @@ import pytest
 from PIL import Image
 from httpx import AsyncClient
 
-from mtgcobuilderapi.config.settings.api import APIConfiguration
-from mtgcobuilderapi.domain.card import MTGCard, MTGIOCard
-from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
+from mtgapi.config.settings.api import APIConfiguration
+from mtgapi.domain.card import MTGCard, MTGIOCard
+from mtgapi.services.apis.mtgio import MTGIOAPIService
 from tests.common.helpers import generate_random_card_ids
 from tests.common.samples import TEST_MTGIO_CARD_ID, TEST_MTGIO_CARD_IMAGE
 

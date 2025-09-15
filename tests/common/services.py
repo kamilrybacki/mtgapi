@@ -7,24 +7,24 @@ import pytest_asyncio
 
 import environ
 import httpx
-from mtgcobuilderapi.config.wiring import wire_services
+from mtgapi.config.wiring import wire_services
 import pytest
 from httpx import ASGITransport, AsyncClient
 from mypy.metastore import random_string
 from testcontainers.core.container import DockerContainer
 
-from mtgcobuilderapi.entrypoint import API
-from mtgcobuilderapi.config.settings.base import (
+from mtgapi.entrypoint import API
+from mtgapi.config.settings.base import (
     APP_CONFIGURATION_PREFIX,
     AsyncHTTPServiceConfigurationBase,
     ServiceAbstractConfigurationBase,
     ServiceConfigurationPrefixes,
 )
-from mtgcobuilderapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL, MTGIO_RATE_LIMIT_HEADER
-from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
-from mtgcobuilderapi.services.base import AbstractSyncService
-from mtgcobuilderapi.services.http import AbstractAsyncHTTPClientService
-from mtgcobuilderapi.services.proxy import AbstractProxyService, Proxy
+from mtgapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL, MTGIO_RATE_LIMIT_HEADER
+from mtgapi.services.apis.mtgio import MTGIOAPIService
+from mtgapi.services.base import AbstractSyncService
+from mtgapi.services.http import AbstractAsyncHTTPClientService
+from mtgapi.services.proxy import AbstractProxyService, Proxy
 from tests.common.helpers import TemporaryEnvContext, use_postgres_container
 
 TEST_HTTP_CONFIGURATION_PREFIX = "TEST_HTTP_SERVICE_"

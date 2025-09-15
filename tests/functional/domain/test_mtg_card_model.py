@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from mtgcobuilderapi.domain.card import MTGCard, MTGIOCard
+from mtgapi.domain.card import MTGCard, MTGIOCard
 from tests.common.samples import LIGHTNING_BOLT_MTG_CARD_DATA, LIGHTNING_BOLT_MTGIO_CARD_DATA
 
 

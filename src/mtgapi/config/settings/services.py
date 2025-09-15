@@ -2,7 +2,7 @@ from enum import StrEnum
 
 import environ
 
-from mtgcobuilderapi.config.settings.base import (
+from mtgapi.config.settings.base import (
     AsyncHTTPServiceConfigurationBase,
     ServiceAbstractConfigurationBase,
     ServiceConfigurationPrefixes,

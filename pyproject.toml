@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "mtgcobuilderapi"
+name = "mtgapi"
 version = "0.1.0"
-description = "API for MTG Cobuilder"
+description = "API service that allows for fast retrieval and local caching of MTG card data using sources like MTGIO, pricing sites etc."
 authors = ["Kamil Rybacki <kamilandrzejrybacki@gmail.com>"]
 readme = "README.md"
 

@@ -2,9 +2,9 @@ import logging
 
 from dependency_injector.wiring import Provide, inject
 
-from mtgcobuilderapi.domain.card import MTGCard
-from mtgcobuilderapi.services import AuxiliaryServiceNames
-from mtgcobuilderapi.services.database import PostgresDatabaseService
+from mtgapi.domain.card import MTGCard
+from mtgapi.services import AuxiliaryServiceNames
+from mtgapi.services.database import PostgresDatabaseService
 
 
 @inject

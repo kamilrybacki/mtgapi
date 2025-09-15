@@ -9,9 +9,9 @@ from typing import Any
 import testcontainers.core.config
 from testcontainers.postgres import PostgresContainer
 
-from mtgcobuilderapi.config.settings.base import ServiceConfigurationPrefixes
-from mtgcobuilderapi.domain.card import MTGCard
-from mtgcobuilderapi.domain.conversions import convert_pydantic_model_to_sqlalchemy_base
+from mtgapi.config.settings.base import ServiceConfigurationPrefixes
+from mtgapi.domain.card import MTGCard
+from mtgapi.domain.conversions import convert_pydantic_model_to_sqlalchemy_base
 from tests.globals import DEFAULT_POSTGRES_CONTAINER_IMAGE, LOG_LEVEL
 
 __LOGGING_CONFIGURED = False

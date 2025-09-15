@@ -3,14 +3,14 @@ import random
 
 import httpx
 import imagehash
-from mtgcobuilderapi.domain.card import MTGCard
+from mtgapi.domain.card import MTGCard
 import pytest
 import requests
 from PIL import Image
 
-from mtgcobuilderapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL
-from mtgcobuilderapi.config.settings.services import MTGIOAPIConfiguration
-from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
+from mtgapi.config.settings.defaults import MTGIO_API_VERSION, MTGIO_BASE_URL
+from mtgapi.config.settings.services import MTGIOAPIConfiguration
+from mtgapi.services.apis.mtgio import MTGIOAPIService
 from tests.common.samples import TEST_MTGIO_CARD_ID, TEST_MTGIO_CARD_IMAGE
 
 QUERY_TESTS_NUMBER = 10
@@ -18,7 +18,7 @@ QUERY_TESTS_NUMBER = 10
 
 @pytest.mark.parametrize(
     "target_id",
-    [random.choice(range(420, 2137)) for _ in range(QUERY_TESTS_NUMBER)],
+    [random.choice(range(100, 1000)) for _ in range(QUERY_TESTS_NUMBER)],
 )
 @pytest.mark.asyncio
 async def test_querying_for_a_card(

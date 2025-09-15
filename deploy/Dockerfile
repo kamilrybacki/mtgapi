@@ -24,4 +24,4 @@ RUN .venv/bin/poetry install
 EXPOSE 8000
 
 # Command to run the application
-CMD [".venv/bin/python", "-m", "uvicorn", "src.mtgcobuilderapi.entrypoint:API", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "info"]
+CMD [".venv/bin/python", "-m", "uvicorn", "src.mtgapi.entrypoint:API", "--host", "0.0.0.0", "--port", "8000", "--reload", "--log-level", "info"]

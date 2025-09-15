@@ -3,8 +3,8 @@ import dataclasses
 
 import httpx
 
-from mtgcobuilderapi.config.settings.base import NullConfiguration
-from mtgcobuilderapi.services.base import AbstractAsyncService
+from mtgapi.config.settings.base import NullConfiguration
+from mtgapi.services.base import AbstractAsyncService
 
 
 @dataclasses.dataclass(frozen=True)

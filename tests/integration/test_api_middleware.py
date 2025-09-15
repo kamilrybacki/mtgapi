@@ -1,12 +1,12 @@
 import logging
 
-from mtgcobuilderapi.config.wiring import wire_services
-from mtgcobuilderapi.services import AuxiliaryServiceNames
+from mtgapi.config.wiring import wire_services
+from mtgapi.services import AuxiliaryServiceNames
 import pytest
 
-from mtgcobuilderapi.services.cache import retrieve_card_data_from_cache
-from mtgcobuilderapi.domain.card import MTGCard
-from mtgcobuilderapi.services.database import PostgresDatabaseService
+from mtgapi.services.cache import retrieve_card_data_from_cache
+from mtgapi.domain.card import MTGCard
+from mtgapi.services.database import PostgresDatabaseService
 from tests.common.helpers import use_postgres_container
 from tests.common.samples import LIGHTNING_BOLT_MTG_CARD_DATA
 

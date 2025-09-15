@@ -8,8 +8,8 @@ from pydantic import BaseModel
 from sqlalchemy.orm import declarative_base
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
-from mtgcobuilderapi.common.exceptions import EmptyPydanticModelError
-from mtgcobuilderapi.config.settings.defaults import CONVERTED_PYDANTIC_MODEL_SUFFIX
+from mtgapi.common.exceptions import EmptyPydanticModelError
+from mtgapi.config.settings.defaults import CONVERTED_PYDANTIC_MODEL_SUFFIX
 
 
 class TypeAnnotationToSQLFieldType(enum.Enum):

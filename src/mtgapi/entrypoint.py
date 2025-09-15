@@ -4,11 +4,11 @@ from typing import Annotated
 
 from fastapi import Depends, FastAPI, Response
 
-from mtgcobuilderapi.config.settings.api import VERSION, APIConfiguration
-from mtgcobuilderapi.config.wiring import wire_services
-from mtgcobuilderapi.domain.card import MTGCard
-from mtgcobuilderapi.services.apis.mtgio import MTGIOAPIService
-from mtgcobuilderapi.services.cache import retrieve_card_data_from_cache
+from mtgapi.config.settings.api import VERSION, APIConfiguration
+from mtgapi.config.wiring import wire_services
+from mtgapi.domain.card import MTGCard
+from mtgapi.services.apis.mtgio import MTGIOAPIService
+from mtgapi.services.cache import retrieve_card_data_from_cache
 
 
 async def mtgio_api_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
@@ -32,10 +32,12 @@ API = FastAPI(
 
 
 @API.get("/card/{card_identifier}")
-async def get_card(card_identifier: int | str, mtgio_service: Annotated[MTGIOAPIService, Depends(MTGIOAPIService)]) -> MTGCard:
-    if isinstance(card_identifier, str) and not card_identifier.isdigit():
+async def get_card(
+    card_identifier: str, mtgio_service: Annotated[MTGIOAPIService, Depends(MTGIOAPIService)]
+) -> MTGCard:
+    if not card_identifier.isdigit():
         raise ValueError("Card identifier must be an integer.")
-    card_identifier = int(card_identifier)
+
     cached_entry: MTGCard = await retrieve_card_data_from_cache(card_identifier)
     if cached_entry:
         return cached_entry
@@ -44,6 +46,8 @@ async def get_card(card_identifier: int | str, mtgio_service: Annotated[MTGIOAPI
 
 
 @API.get("/card/{card_identifier}/image")
-async def get_card_image(card_identifier: int, mtgio_service: Annotated[MTGIOAPIService, Depends(MTGIOAPIService)]) -> Response:
+async def get_card_image(
+    card_identifier: str, mtgio_service: Annotated[MTGIOAPIService, Depends(MTGIOAPIService)]
+) -> Response:
     card_data_from_mtgio = await get_card(card_identifier, mtgio_service)
     return Response(content=await mtgio_service.get_card_image(card_data_from_mtgio), media_type="image/webp")

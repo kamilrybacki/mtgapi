@@ -9,10 +9,10 @@ import httpx
 import tenacity
 from dependency_injector.wiring import Provide, inject
 
-from mtgcobuilderapi.config.settings.base import AsyncHTTPServiceConfigurationBase
-from mtgcobuilderapi.services import AuxiliaryServiceNames
-from mtgcobuilderapi.services.base import AbstractAsyncService
-from mtgcobuilderapi.services.proxy import AbstractProxyService, NullProxyService
+from mtgapi.config.settings.base import AsyncHTTPServiceConfigurationBase
+from mtgapi.services import AuxiliaryServiceNames
+from mtgapi.services.base import AbstractAsyncService
+from mtgapi.services.proxy import AbstractProxyService, NullProxyService
 
 
 @dataclasses.dataclass
