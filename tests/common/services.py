@@ -162,7 +162,7 @@ def three_proxy_service() -> Generator[ThreeProxyService, None, None]:
         with TemporaryEnvContext(
             **{
                 TEST_PROXY_CONFIGURATION_PREFIX + "_HOST": three_proxy_server.get_container_host_ip(),
-                TEST_PROXY_CONFIGURATION_PREFIX + "_PORT": three_proxy_server.get_exposed_port(3128),
+                TEST_PROXY_CONFIGURATION_PREFIX + "_PORT": str(three_proxy_server.get_exposed_port(3128)),
                 TEST_PROXY_CONFIGURATION_PREFIX + "_USERNAME": random_login,
                 TEST_PROXY_CONFIGURATION_PREFIX + "_PASSWORD": random_password,
             }
