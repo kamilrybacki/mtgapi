@@ -38,7 +38,7 @@ async def get_card(
     if not card_identifier.isdigit():
         raise ValueError("Card identifier must be an integer.")
 
-    cached_entry: MTGCard = await retrieve_card_data_from_cache(int(card_identifier))
+    cached_entry: MTGCard = await retrieve_card_data_from_cache(card_identifier)
     if cached_entry:
         return cached_entry
     card_data_from_mtgio = await mtgio_service.get_card(int(card_identifier))
