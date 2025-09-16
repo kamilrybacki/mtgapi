@@ -19,12 +19,14 @@ LIGHTNING_BOLT_MTGIO_CARD_DATA = {
     "foreign_names": [{"name": "Foudre", "language": "French"}],
     "printings": ["LEA", "2ED"],
     "id": "a1b2c3d4e5f6g7h8i9j0",
+    "multiverse_id": 123456,
     "image_url": "http://example.com/image.jpg",
 }
 
 LIGHTNING_BOLT_MTG_CARD_DATA = {
     "name": "Lightning Bolt",
     "id": "a1b2c3d4e5f6g7h8i9j0",
+    "multiverse_id": "123456",
     "aliases": [],
     "rulings": [],
     "mana_value": ManaValue(colorless=0, red=1),

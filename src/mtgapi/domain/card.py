@@ -1,4 +1,5 @@
 import logging
+from operator import mul
 import re
 from enum import StrEnum
 from typing import Any, ClassVar, TypedDict
@@ -393,6 +394,11 @@ class MTGIOCard(BaseModel):
         description="Unique identifier for the card in the MTGIO database (SHA1 hash of setCode + cardName + cardImageName)",
         examples=["a1b2c3d4e5f6g7h8i9j0"],
     )
+    multiverse_id: str = Field(
+        default="",
+        description="Multiverse ID of the card, if available",
+        examples=["123456"],
+    )
     image_url: str = Field(
         description="URL to the card's image in the MTGIO database",
         examples=["http://example.com/image.jpg"],
@@ -434,6 +440,7 @@ class MTGIOCard(BaseModel):
             ],
             printings=payload.get("printings", []),
             id=payload["id"],
+            multiverse_id=str(payload.get("multiverseid", "")),
             image_url=payload.get("imageUrl", ""),
         )
 
@@ -501,6 +508,7 @@ class MTGCard(BaseModel):
     """Represents a Magic: The Gathering card."""
 
     id: str = Field(..., description="Unique identifier for the card")
+    multiverse_id: str = Field(None, description="Multiverse ID of the card, if available")
     name: str = Field(..., description="Name of the card")
     aliases: list[MTGCardAlias] = Field(default_factory=list, description="List of foreign names for the card")
     rulings: list[MTGCardRuling] = Field(default_factory=list, description="List of rulings for the card")
@@ -526,6 +534,7 @@ class MTGCard(BaseModel):
         logging.info(f"Converting MTGIOCard '{card.names[0]}' with ID '{card.id}' to MTGCard.")
         return cls(
             id=card.id,
+            multiverse_id=card.multiverse_id,
             name=card.names[0],
             aliases=card.foreign_names,
             rulings=card.rulings,
