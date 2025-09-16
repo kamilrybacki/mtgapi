@@ -1,5 +1,4 @@
 import logging
-from operator import mul
 import re
 from enum import StrEnum
 from typing import Any, ClassVar, TypedDict
@@ -508,7 +507,7 @@ class MTGCard(BaseModel):
     """Represents a Magic: The Gathering card."""
 
     id: str = Field(..., description="Unique identifier for the card")
-    multiverse_id: str = Field(None, description="Multiverse ID of the card, if available")
+    multiverse_id: str = Field(..., description="Multiverse ID of the card, if available")
     name: str = Field(..., description="Name of the card")
     aliases: list[MTGCardAlias] = Field(default_factory=list, description="List of foreign names for the card")
     rulings: list[MTGCardRuling] = Field(default_factory=list, description="List of rulings for the card")

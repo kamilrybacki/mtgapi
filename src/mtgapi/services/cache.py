@@ -31,7 +31,7 @@ async def retrieve_card_data_from_cache(
         logging.exception("[CACHE] Failed to retrieve cached card data", exc_info=encountered_exception)
         return MTGCard.null()  # type: ignore
 
-    data = results[0]
+    data: MTGCard = results[0]  # type: ignore
     logging.info(f"[CACHE] Retrieved cached data for id={identifier}: {data.name}")
     return MTGCard(**data.__dict__)
 

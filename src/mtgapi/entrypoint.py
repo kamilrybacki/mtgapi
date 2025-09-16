@@ -2,7 +2,7 @@ import logging
 from collections.abc import AsyncGenerator
 from typing import Annotated
 
-from fastapi import Depends, FastAPI, Response, HTTPException
+from fastapi import Depends, FastAPI, HTTPException, Response
 
 from mtgapi.config.settings.api import VERSION, APIConfiguration
 from mtgapi.config.settings.defaults import KNOWN_ID_EXCEPTIONS
@@ -47,11 +47,10 @@ async def get_card(
     cached_entry: MTGCard = await retrieve_card_data_from_cache(card_identifier)
     if cached_entry:
         return cached_entry
-    else:
-        card_data_from_mtgio = await mtgio_service.get_card(int(card_identifier))
-        mtg_card = MTGCard.from_mtgio_card(card_data_from_mtgio)
-        await cache_card_data(mtg_card)
-        return mtg_card
+    card_data_from_mtgio = await mtgio_service.get_card(int(card_identifier))
+    mtg_card = MTGCard.from_mtgio_card(card_data_from_mtgio)
+    await cache_card_data(mtg_card)
+    return mtg_card
 
 
 @API.get("/card/{card_identifier}/image")
