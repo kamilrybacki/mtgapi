@@ -9,7 +9,7 @@ from mtgapi.services.database import PostgresDatabaseService
 
 @inject
 async def retrieve_card_data_from_cache(
-    identifier: int, database: PostgresDatabaseService = Provide[AuxiliaryServiceNames.DATABASE]
+    identifier: str, database: PostgresDatabaseService = Provide[AuxiliaryServiceNames.DATABASE]
 ) -> MTGCard:
     """
     Retrieve card data from the cache.
