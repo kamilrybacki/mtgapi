@@ -12,9 +12,9 @@ def test_mtg_iocard_valid() -> None:
     for field, expected in LIGHTNING_BOLT_MTGIO_CARD_DATA.items():
         actual = getattr(card, field)
         if field in {"rulings", "foreign_names"} and expected:
-            assert actual[0] == expected[0]  # type: ignore
+            assert actual[0] == expected[0]
         elif field == "printings":
-            assert set(actual) == set(expected)  # type: ignore
+            assert set(actual) == set(expected)
         else:
             assert actual == expected
 
