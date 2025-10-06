@@ -12,15 +12,23 @@ inputs:
   poetry-version:
     description: 'Poetry version spec (e.g., 1.8.*)'
     required: false
-    default: '1.8.*'
+    default: '2.*'
   install-export-plugin:
     description: 'Install poetry-plugin-export (requires Poetry >=1.7, plugin itself >=1.8, >=1.9 needs Poetry >=2.0)'
     required: false
     default: 'true'
+  export-plugin-version:
+    description: 'Explicit version spec for poetry-plugin-export (e.g. <1.9.0). If empty, auto-select based on Poetry major version.'
+    required: false
+    default: ''
   cache-key-suffix:
     description: 'Extra suffix to differentiate caches (e.g., job name)'
     required: false
     default: ''
+  verify-export:
+    description: 'If true, run a quick poetry export to verify plugin availability.'
+    required: false
+    default: 'false'
 runs:
   using: 'composite'
   steps:
@@ -34,37 +42,47 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: pip-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('**/poetry.lock') }}${{ inputs.cache-key-suffix }}
+        key: pip-${{ runner.os }}-py${{ inputs.python-version }}-poetry2-${{ hashFiles('**/poetry.lock') }}${{ inputs.cache-key-suffix }}
         restore-keys: |
-          pip-${{ runner.os }}-py${{ inputs.python-version }}-
+          pip-${{ runner.os }}-py${{ inputs.python-version }}-poetry2-
 
     - name: Cache virtualenv
       id: venv-cache
       uses: actions/cache@v4
       with:
         path: .venv
-        key: venv-${{ runner.os }}-py${{ inputs.python-version }}-${{ hashFiles('poetry.lock') }}${{ inputs.cache-key-suffix }}
+        key: venv-${{ runner.os }}-py${{ inputs.python-version }}-poetry2-${{ hashFiles('poetry.lock') }}${{ inputs.cache-key-suffix }}
         restore-keys: |
-          venv-${{ runner.os }}-py${{ inputs.python-version }}-
+          venv-${{ runner.os }}-py${{ inputs.python-version }}-poetry2-
 
     - name: Install Poetry
       shell: bash
       run: |
-        python -m pip install --upgrade pip
-        pip install "poetry==${{ inputs.poetry-version }}"
-        if [ "${{ inputs.install-export-plugin }}" = "true" ]; then
-          # Try a version of the plugin compatible with Poetry <2 first
-          set -e
-          if poetry self add 'poetry-plugin-export<1.9.0' 2>/dev/null; then
-            echo "Installed export plugin <1.9.0 for Poetry <2 compatibility";
+          python -m pip install --upgrade pip
+          pip install "poetry==${{ inputs.poetry-version }}"
+          if [ "${{ inputs.install-export-plugin }}" = "true" ]; then
+            set -e
+            POETRY_VERSION_STR=$(poetry --version | awk '{print $2}')
+            POETRY_MAJOR=${POETRY_VERSION_STR%%.*}
+            TARGET_SPEC="${{ inputs.export-plugin-version }}"
+            if [ -z "$TARGET_SPEC" ]; then
+              if [ "$POETRY_MAJOR" = "1" ]; then
+                TARGET_SPEC='poetry-plugin-export<1.9.0'
+              else
+                TARGET_SPEC='poetry-plugin-export'
+              fi
+            fi
+            echo "Attempting to install plugin spec: $TARGET_SPEC (Poetry major=$POETRY_MAJOR)"
+            if ! poetry self add "$TARGET_SPEC"; then
+              echo "Primary plugin install failed for spec '$TARGET_SPEC'. Trying unpinned fallback..."
+              poetry self add poetry-plugin-export || echo "Warning: export plugin unavailable; export step may fail.";
+            fi
           else
-            echo "Falling back; attempting latest poetry-plugin-export (may require Poetry >=2).";
-            poetry self add poetry-plugin-export || echo "Warning: export plugin install failed; continuing without plugin";
+            echo "Skipping poetry-plugin-export installation as requested.";
           fi
-        else
-          echo "Skipping poetry-plugin-export installation as requested.";
-        fi
-        poetry --version
+          poetry --version
+          echo "Installed Poetry plugins:"
+          poetry self show plugins || echo "(No plugins reported)"
       env:
         POETRY_VIRTUALENVS_IN_PROJECT: "true"
         POETRY_VIRTUALENVS_CREATE: "true"
@@ -77,3 +95,18 @@ runs:
       env:
         POETRY_VIRTUALENVS_IN_PROJECT: "true"
         POETRY_VIRTUALENVS_CREATE: "true"
+
+    - name: Verify export functionality
+      if: inputs.verify-export == 'true'
+      shell: bash
+      run: |
+        set -e
+        echo "Verifying poetry export (sanity check)..."
+        poetry export --without-hashes -f requirements.txt -o /tmp/requirements-verify.txt
+        if [ ! -s /tmp/requirements-verify.txt ]; then
+          echo "ERROR: Export produced empty file." >&2
+          exit 1
+        fi
+        head -n 5 /tmp/requirements-verify.txt || true
+        sha256sum /tmp/requirements-verify.txt | tee /tmp/requirements-verify.sha256
+        echo "Export verification succeeded (non-empty, checksum generated)."
