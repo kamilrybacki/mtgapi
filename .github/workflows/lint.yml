@@ -10,23 +10,24 @@ on:
   pull_request:
     branches: [main]
 
+env:
+  POETRY_VERSION: "1.8.*"
+  POETRY_VIRTUALENVS_IN_PROJECT: "true"
+  POETRY_VIRTUALENVS_CREATE: "true"
+
 jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/checkout@v4
+      - name: Setup environment (Poetry + caches)
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          poetry install
+          poetry-version: ${{ env.POETRY_VERSION }}
+          install-deps: 'true'
+          cache-key-suffix: '-mypy'
 
       - name: Run MyPy
         run: poetry run mypy . --config-file pyproject.toml
@@ -35,18 +36,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/checkout@v4
+      - name: Setup environment (Poetry + caches)
+        uses: ./.github/actions/setup-poetry
         with:
           python-version: '3.12'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install poetry
-          poetry install
+          poetry-version: ${{ env.POETRY_VERSION }}
+          install-deps: 'true'
+          cache-key-suffix: '-ruff'
 
       - name: Run Ruff
         run: poetry run ruff check --config pyproject.toml
