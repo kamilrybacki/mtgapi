@@ -19,9 +19,11 @@ WORKDIR /app
 # Only copy dependency definition first for better layer caching
 COPY pyproject.toml poetry.lock* ./
 
-RUN pip install --upgrade pip poetry \
+RUN pip install --upgrade pip "poetry==1.7.1" \
+	&& poetry --version \
 	&& poetry export --format=requirements.txt --output requirements.txt --without-hashes \
-	&& poetry export --with dev --format=requirements.txt --output requirements-dev.txt --without-hashes
+	&& (poetry export --with dev --format=requirements.txt --output requirements-dev.txt --without-hashes \
+		|| poetry export --dev --format=requirements.txt --output requirements-dev.txt --without-hashes)
 
 # Install only runtime dependencies to /install
 RUN pip install --prefix /install -r requirements.txt
