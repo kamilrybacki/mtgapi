@@ -10,16 +10,6 @@ tasks:
       - "{{.FULL_PACKAGER_COMMAND}} lock"
       - "{{.FULL_PACKAGER_COMMAND}} install --all-groups"
 
-  backend:install:
-    desc: Alias to install-dev (compat with CI scripts)
-    cmds:
-      - task: install-dev
-
-  backend:install:test:
-    desc: Alias to install-dev (test flavor)
-    cmds:
-      - task: install-dev
-
   install-prod:
     desc: Install production dependencies
     cmds:
