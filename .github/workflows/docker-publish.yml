@@ -78,11 +78,13 @@ jobs:
       - name: Install Trivy
         if: github.ref == 'refs/heads/main'
         run: |
+          set -euo pipefail
           sudo apt-get update -y
-            && sudo apt-get install -y wget
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo deb https://aquasecurity.github.io/trivy-repo/deb stable main | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update -y && sudo apt-get install -y trivy
+          sudo apt-get install -y wget gnupg lsb-release
+          curl -fsSL https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo gpg --dearmor -o /usr/share/keyrings/trivy.gpg
+          echo "deb [signed-by=/usr/share/keyrings/trivy.gpg] https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update -y
+          sudo apt-get install -y trivy
 
       - name: Trivy vulnerability scan (image)
         if: github.ref == 'refs/heads/main'
