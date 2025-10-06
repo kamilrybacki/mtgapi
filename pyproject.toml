@@ -8,6 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 fastapi = "^0.110.0"
+starlette = ">=0.40.0,<0.41.0"  # CVE-2024-47874 fixed in 0.40.0
 uvicorn = "^0.29.0"
 sqlalchemy = { version="^2.0.16", extras=["asyncio"]}
 asyncpg = "^0.30.0"

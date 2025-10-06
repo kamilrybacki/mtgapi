@@ -83,8 +83,8 @@ jobs:
             aquasec/trivy:latest image \
             --severity CRITICAL,HIGH \
             --ignore-unfixed \
-            --exit-code 0 \
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest || true
+            --exit-code 1 \
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
 
       - name: Summarize
         run: |
