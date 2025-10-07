@@ -37,21 +37,27 @@ jobs:
         run: |
           echo "hash=$(sha256sum poetry.lock | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
 
-      - name: Verify lock consistency
+      - name: Run lock to detect drift (no version bumps)
         run: |
-          # '--check' exits non-zero if the lock would change; no file mutation.
-          poetry lock --check || {
+          # Capture original contents
+          cp poetry.lock poetry.lock.original
+          # Recreate lock deterministically; Poetry will only rewrite if resolution differs
+          poetry lock
+          if ! diff -q poetry.lock.original poetry.lock >/dev/null; then
             echo "::error::Lock drift detected. Run 'poetry lock' locally and commit the updated poetry.lock." >&2
+            echo "-- Begin Diff --"
+            git --no-pager diff --color=always --no-index poetry.lock.original poetry.lock || true
+            echo "-- End Diff --"
             exit 1
-          }
+          fi
+          echo "Lockfile stable (no drift)."
 
-      - name: Capture post-check hash
+      - name: Capture post-run hash
         id: compare
         run: |
-          # File should be untouched when using '--check'. Hash purely for summary parity display.
+          # File should match original when stable; we recompute hash for summary.
           after_hash=$(sha256sum poetry.lock | cut -d' ' -f1)
           echo "after_hash=$after_hash" >> "$GITHUB_OUTPUT"
-          echo "Lockfile stable (no drift)."
 
       - name: Summarize
         if: always()
