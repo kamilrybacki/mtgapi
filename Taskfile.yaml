@@ -148,6 +148,26 @@ tasks:
         $POETRY_CMD export -f requirements.txt --output requirements.txt --without-hashes
         $POETRY_CMD run pip-audit -r requirements.txt --progress-spinner=off
 
+  coverage-badge:
+    desc: Generate local coverage.xml and update badges/coverage.svg
+    cmds:
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run coverage run -m pytest -q
+        $POETRY_CMD run coverage xml
+        percent=$(grep -o 'line-rate="[0-9.]*"' coverage.xml | head -1 | cut -d '"' -f2)
+        pct=$(python -c "print(int(round(float('$percent')*100)))")
+        mkdir -p badges
+        color=brightgreen
+        if [ "$pct" -lt 90 ]; then color=yellowgreen; fi
+        if [ "$pct" -lt 80 ]; then color=yellow; fi
+        if [ "$pct" -lt 70 ]; then color=orange; fi
+        if [ "$pct" -lt 60 ]; then color=red; fi
+        cat > badges/coverage.svg <<EOF
+        <svg xmlns="http://www.w3.org/2000/svg" width="120" height="20" role="img" aria-label="coverage:${pct}%"><title>coverage:${pct}%</title><linearGradient id="s" x2="0" y2="100%"><stop offset="0" stop-color="#bbb" stop-opacity=".1"/><stop offset="1" stop-opacity=".1"/></linearGradient><clipPath id="r"><rect width="120" height="20" rx="3" fill="#fff"/></clipPath><g clip-path="url(#r)"><rect width="63" height="20" fill="#555"/><rect x="63" width="57" height="20" fill="#${color}"/><rect width="120" height="20" fill="url(#s)"/></g><g fill="#fff" text-anchor="middle" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" text-rendering="geometricPrecision" font-size="110"><text aria-hidden="true" x="325" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="530">coverage</text><text x="325" y="140" transform="scale(.1)" fill="#fff" textLength="530">coverage</text><text aria-hidden="true" x="905" y="150" fill="#010101" fill-opacity=".3" transform="scale(.1)" textLength="370">${pct}%</text><text x="905" y="140" transform="scale(.1)" fill="#fff" textLength="370">${pct}%</text></g></svg>
+        EOF
+        echo "Updated badges/coverage.svg to ${pct}%"
+
   export-schemas:
     desc: Export JSON schemas for domain models
     cmds:
