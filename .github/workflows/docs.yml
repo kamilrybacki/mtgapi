@@ -25,7 +25,14 @@ jobs:
       - name: Install deps
         run: |
           poetry install --with dev
+      - name: Cache OpenAPI schema
+        id: openapi-cache
+        uses: actions/cache@v4
+        with:
+          path: docs/_generated_openapi/openapi.json
+          key: openapi-${{ hashFiles('src/mtgapi/**/*.py', 'pyproject.toml') }}
       - name: Export OpenAPI schema
+        if: steps.openapi-cache.outputs.cache-hit != 'true'
         run: |
           poetry run python scripts/export_openapi.py
       - name: Export JSON Schemas

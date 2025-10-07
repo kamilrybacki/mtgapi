@@ -37,6 +37,7 @@ jobs:
       - name: Install dependencies
         run: |
           poetry install --with dev
+          poetry self add poetry-plugin-export
 
       - name: Export requirements
         run: |
