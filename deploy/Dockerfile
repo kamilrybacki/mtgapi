@@ -30,11 +30,9 @@ RUN pip install --prefix /install -r requirements.txt
 # Install dev (test/tooling) dependencies to a separate prefix (optional layer for future test images)
 RUN pip install --prefix /install-dev -r requirements-dev.txt
 
-# Copy application source (needed for build/install below)
+# Copy application source and install it (PEP 517 build via pip) so 'mtgapi' is importable
 COPY src ./src
-
-# Install the package into the builder environment so it's importable as 'mtgapi'
-RUN poetry build -f wheel && pip install dist/*.whl
+RUN pip install --prefix /install .
 
 # ---------- Runtime stage ----------
 FROM python:3.12-slim AS runtime
@@ -74,8 +72,5 @@ USER appuser
 # To enable later, uncomment one of the lines below (both forms are valid Docker syntax):
 # HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD /bin/sh /app/healthcheck.sh
 # HEALTHCHECK CMD curl -f http://127.0.0.1:8000/docs || exit 1
-
-# Ensure PYTHONPATH includes /app/src as a fallback (not strictly required after wheel install, but harmless)
-ENV PYTHONPATH="/app/src:${PYTHONPATH}"
 
 CMD ["python", "-m", "uvicorn", "mtgapi.entrypoint:API", "--host", "0.0.0.0", "--port", "8000"]

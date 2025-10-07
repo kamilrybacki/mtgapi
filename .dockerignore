@@ -1,19 +1,26 @@
-.venv
 .git
 .github
+.idea
+.vscode
+.venv
 __pycache__
 *.pyc
 *.pyo
-*.pytest_cache
+*.pyd
+.pytest_cache
 .mypy_cache
 .ruff_cache
 .cache
-.idea
-.vscode
-dist
 build
-poetry.lock
-tests
-Taskfile.yaml
+dist
+htmlcov
+site
+*.egg-info
+node_modules
 Dockerfile
 deploy/docker-compose.yaml
+Taskfile.yaml
+badges/coverage.svg
+# Keep tests (might mount or build separate test image); comment out to exclude:
+# tests
+# Keep lockfile for deterministic dependency resolution
