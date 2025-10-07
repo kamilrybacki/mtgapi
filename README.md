@@ -253,11 +253,11 @@ task dependency-audit
 
 CI runs a scheduled dependency audit (and on pushes/PRs) with a configurable failure threshold.
 
-Lock consistency is enforced by a separate workflow (`lock-consistency.yml`) which runs `poetry lock --no-update` and fails if the resulting `poetry.lock` hash changes (indicating drift or an uncommitted lock refresh). Run it locally with:
+Lock consistency is enforced by a separate workflow (`lock-consistency.yml`) which runs `poetry lock --check` and fails if the lock would change (indicating drift or an uncommitted lock refresh). Run it locally with:
 
 ```bash
-poetry lock --no-update
-git diff --exit-code poetry.lock   # should produce no changes
+poetry lock --check   # exits non-zero if lock needs regeneration
+poetry lock           # (only if above command fails, then commit the updated poetry.lock)
 ```
 
 Badge (generated on the nightly schedule or manual dispatch) will appear once `badges/dependency_audit.json` is committed. Example (after first schedule run):
@@ -316,8 +316,8 @@ Hooks run automatically on staged changes after installation.
 Additional manual hooks (not run automatically):
 
 ```bash
-pre-commit run ruff-fix -a              # apply auto-fixes (stages: manual)
-pre-commit run poetry-lock-no-update    # validate lock reproducibility without upgrades
+pre-commit run ruff-fix -a         # apply auto-fixes (stages: manual)
+pre-commit run poetry-lock-check   # verify lock is current (no regeneration needed)
 ```
 
 These are marked with `stages: [manual]` to avoid slowing normal commits; invoke them explicitly when needed.

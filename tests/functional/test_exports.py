@@ -4,6 +4,7 @@ Focused on verifying that the export functions write files to the expected
 locations. Paths are redirected to a temporary directory to avoid polluting
 real docs output during the test run.
 """
+
 from __future__ import annotations
 
 import json

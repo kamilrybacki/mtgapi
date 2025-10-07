@@ -77,11 +77,9 @@ ignore = [
     "TD003",
     "FIX002", # too verbose descriptions of todos
     "PGH003", # concrete type ignores
-    "UP045",  # for BaseModel use Optional[X] instead of X | None
     "G004",
     "EM101",
     "EM102",
-    "LOG015",
     "S101",
     "ASYNC210",
     "TC001",

@@ -9,13 +9,17 @@ Currently exports the following domain models:
 Schemas are written to ``docs/_generated_schemas/*.json`` for inclusion in the
 documentation site (embedded via the include-markdown plugin).
 """
+
 from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Iterable
+from typing import TYPE_CHECKING, Any
 
-from mtgapi.domain.card import MTGCard, MTGIOCard, ManaValue
+from mtgapi.domain.card import ManaValue, MTGCard, MTGIOCard
+
+if TYPE_CHECKING:  # pragma: no cover
+    from collections.abc import Iterable
 
 OUTPUT_DIR = Path(__file__).parent.parent / "docs" / "_generated_schemas"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -26,8 +30,10 @@ MODELS: dict[str, Any] = {
     "mana_value.schema.json": ManaValue,
 }
 
+
 def _get_schema(model: Any) -> dict[str, Any]:
-    """Return a JSON schema for the given Pydantic model.
+    """
+    Return a JSON schema for the given Pydantic model.
 
     Tries ``model_json_schema`` (Pydantic v2) then ``schema`` (legacy) for
     compatibility in type checking contexts.
@@ -40,7 +46,8 @@ def _get_schema(model: Any) -> dict[str, Any]:
 
 
 def export() -> Iterable[tuple[str, Path]]:
-    """Export all configured model schemas.
+    """
+    Export all configured model schemas.
 
     Returns an iterable of (filename, path) pairs for potential logging or
     downstream processing.
@@ -51,6 +58,7 @@ def export() -> Iterable[tuple[str, Path]]:
         with out_path.open("w", encoding="utf-8") as f:
             json.dump(schema, f, indent=2, ensure_ascii=False)
         yield filename, out_path
+
 
 if __name__ == "__main__":  # pragma: no cover
     # Intentionally avoid prints (Ruff T201). A caller / CI step can echo results
