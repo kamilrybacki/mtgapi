@@ -30,8 +30,11 @@ RUN pip install --prefix /install -r requirements.txt
 # Install dev (test/tooling) dependencies to a separate prefix (optional layer for future test images)
 RUN pip install --prefix /install-dev -r requirements-dev.txt
 
-# Now copy the application source
+# Copy application source (needed for build/install below)
 COPY src ./src
+
+# Install the package into the builder environment so it's importable as 'mtgapi'
+RUN poetry build -f wheel && pip install dist/*.whl
 
 # ---------- Runtime stage ----------
 FROM python:3.12-slim AS runtime
@@ -49,6 +52,7 @@ RUN useradd -u 10001 -m appuser
 # Copy installed site-packages and application code
 COPY --from=builder /install /usr/local
 # (Dev dependencies kept out intentionally; can be copied from /install-dev if needed for debugging.)
+# Copy source for introspection / debugging (optional)
 COPY --from=builder /app/src ./src
 
 # Expose the port the app runs on
@@ -71,4 +75,7 @@ USER appuser
 # HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD /bin/sh /app/healthcheck.sh
 # HEALTHCHECK CMD curl -f http://127.0.0.1:8000/docs || exit 1
 
-CMD ["python", "-m", "uvicorn", "src.mtgapi.entrypoint:API", "--host", "0.0.0.0", "--port", "8000"]
+# Ensure PYTHONPATH includes /app/src as a fallback (not strictly required after wheel install, but harmless)
+ENV PYTHONPATH="/app/src:${PYTHONPATH}"
+
+CMD ["python", "-m", "uvicorn", "mtgapi.entrypoint:API", "--host", "0.0.0.0", "--port", "8000"]
