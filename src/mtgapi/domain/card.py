@@ -574,3 +574,9 @@ class MTGCard(BaseModel):
 
     def __bool__(self) -> bool:
         return bool(self.id and self.name)
+
+    def __eq__(self, other: object) -> bool:
+        """Check equality based on the card's unique identifier."""
+        if not isinstance(other, MTGCard):
+            return NotImplemented
+        return self.id == other.id
