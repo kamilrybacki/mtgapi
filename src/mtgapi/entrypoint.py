@@ -26,7 +26,7 @@ async def mtgio_api_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 
 API = FastAPI(
-    title="MTGCobuilder API",
+    title="MTG API",
     version=VERSION,
     lifespan=mtgio_api_lifespan,  # type: ignore
 )

@@ -80,7 +80,7 @@ tasks:
   build-image:
     desc: Build the local Docker image (no push)
     vars:
-      IMAGE_NAME: 'ghcr.io/{{.GITHUB__REPOSITORY | default "kamilrybacki/mtgcobuilder-api"}}'
+      IMAGE_NAME: 'ghcr.io/{{.GITHUB__REPOSITORY | default "kamilrybacki/mtgapi"}}'
       DOCKERFILE: "deploy/Dockerfile"
     cmds:
       - docker build -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}}:local .
@@ -88,7 +88,7 @@ tasks:
   push-image:
     desc: Build and push image to GHCR (requires 'docker login ghcr.io')
     vars:
-      IMAGE_NAME: 'ghcr.io/{{.GITHUB__REPOSITORY | default "kamilrybacki/mtgcobuilder-api"}}'
+      IMAGE_NAME: 'ghcr.io/{{.GITHUB__REPOSITORY | default "kamilrybacki/mtgapi"}}'
       DOCKERFILE: "deploy/Dockerfile"
     cmds:
       - docker build -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}}:latest .
