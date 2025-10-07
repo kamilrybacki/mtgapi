@@ -1,5 +1,6 @@
 import logging
 from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Response
@@ -11,7 +12,10 @@ from mtgapi.domain.card import MTGCard
 from mtgapi.services.apis.mtgio import MTGIOAPIService
 from mtgapi.services.cache import cache_card_data, retrieve_card_data_from_cache
 
+logger = logging.getLogger(__name__)
 
+
+@asynccontextmanager
 async def mtgio_api_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
     config: APIConfiguration
     with APIConfiguration().use() as config:
@@ -21,14 +25,16 @@ async def mtgio_api_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         services_container = wire_services()
         services_container.init_resources()
         app.root_path = config.root_path
-        yield
-        services_container.shutdown_resources()
+        try:
+            yield
+        finally:
+            services_container.shutdown_resources()
 
 
 API = FastAPI(
     title="MTG API",
     version=VERSION,
-    lifespan=mtgio_api_lifespan,  # type: ignore
+    lifespan=mtgio_api_lifespan,
 )
 
 
@@ -38,7 +44,7 @@ async def get_card(
 ) -> MTGCard:
     if card_identifier in KNOWN_ID_EXCEPTIONS:
         exception_reason = KNOWN_ID_EXCEPTIONS[card_identifier]
-        logging.warning(f"Card identifier '{card_identifier}' is in known exceptions: {exception_reason}")
+        logger.warning("Card identifier '%s' is in known exceptions: %s", card_identifier, exception_reason)
         raise HTTPException(status_code=400, detail=exception_reason)
 
     if not card_identifier.isdigit():

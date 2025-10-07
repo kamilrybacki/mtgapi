@@ -9,6 +9,8 @@ import nest_asyncio
 from mtgapi.common.exceptions import InvalidServiceDefinitionError
 from mtgapi.config.settings.base import ServiceAbstractConfigurationBase
 
+logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class AbstractServiceBase(abc.ABC):
@@ -38,7 +40,7 @@ class AbstractServiceBase(abc.ABC):
         Post-initialization method that can be overridden by subclasses.
         This method is called after the service has been initialized with the configuration.
         """
-        logging.info(f"[Service] Initialized service {self.__class__.__name__}")
+        logger.info("Initialized service %s", self.__class__.__name__)
 
     @abc.abstractmethod
     def _initialize(self, config: ServiceAbstractConfigurationBase) -> None:

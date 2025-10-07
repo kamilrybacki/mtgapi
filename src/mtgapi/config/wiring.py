@@ -18,6 +18,8 @@ SERVICES_MAP = {
     AuxiliaryServiceNames.DATABASE: PostgresDatabaseService,
 }
 
+logger = logging.getLogger(__name__)
+
 
 def wire_services() -> DynamicContainer:
     container = DynamicContainer()
@@ -25,11 +27,11 @@ def wire_services() -> DynamicContainer:
     for service_name, implementation in SERVICES_MAP.items():
         provider = Singleton(implementation)
         setattr(container, service_name, provider)
-        logging.info(f"[INFO] Registered {service_name} with {implementation.__name__}")
+        logger.info("Registered %s with %s", service_name, implementation.__name__)
 
     for module in MODULES_TO_WIRE:
         setattr(importlib.import_module(module), container.__class__.__name__, container)
-        logging.info(f"[INFO] Wiring container to {module}")
+        logger.info("Wiring container to %s", module)
 
     container.wire(modules=MODULES_TO_WIRE)
     container.reset_singletons()

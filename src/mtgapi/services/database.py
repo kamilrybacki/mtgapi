@@ -17,6 +17,8 @@ from mtgapi.config.settings.services import PostgresConfiguration
 from mtgapi.domain.conversions import convert_pydantic_model_to_sqlalchemy_base
 from mtgapi.services.base import AbstractAsyncService
 
+logger = logging.getLogger(__name__)
+
 DatabaseClient = TypeVar("DatabaseClient")
 
 
@@ -39,7 +41,7 @@ class AbstractDatabaseService(AbstractAsyncService, abc.ABC):
         Connects to the database using the provided configuration.
         This method is intended to be overridden by subclasses.
         """
-        logging.info("[DatabaseService] Initializing database connection.")
+        logger.info("Initializing database connection.")
         try:
             await self.connect(config)
         except Exception as could_not_connect:
@@ -80,14 +82,14 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         """
         Connects to the PostgreSQL database using the provided configuration.
         """
-        logging.info("[DB] Initializing PostgreSQL connection.")
+        logger.info("Initializing PostgreSQL connection.")
         engine = create_async_engine(
             url=config.connection_string,
         )
         self.client = await engine.connect()
         await self.client.execution_options(isolation_level="AUTOCOMMIT")
         self.session = async_sessionmaker(bind=self.client)
-        logging.info("[DB] PostgreSQL connection established.")
+        logger.info("PostgreSQL connection established.")
 
         synchronous_disconnect_handler = lambda: asyncio.run(self.disconnect())  # noqa: E731
         atexit.register(synchronous_disconnect_handler)
@@ -96,7 +98,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         """
         Disconnects from the PostgreSQL database.
         """
-        logging.info("[DB] Disconnecting PostgreSQL connection.")
+        logger.info("Disconnecting PostgreSQL connection.")
         if self.client:
             await self.client.close()
             self.client = None
@@ -121,11 +123,11 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         async with self.session.begin() as session:
             connection = await session.connection()
             await connection.run_sync(sql_table_model.metadata.create_all)
-            logging.info(f"[DB] Created new model for {sql_table_model.__name__}")
+            logger.info("Created new model for %s", sql_table_model.__name__)
 
     async def get_objects(
         self, object_type: type[BaseModel] | type[DeclarativeBase], filters: dict[str, Any] | None = None
-    ) -> Sequence[DeclarativeBase]:
+    ) -> Sequence[Any]:
         """
         Retrieves objects from the database based on the provided object type and filters.
         This method supports both SQLAlchemy models and Pydantic models by converting the latter to SQLAlchemy base models.
@@ -150,7 +152,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         async with self.session.begin() as session:
             result = await session.execute(query)
             session.expunge_all()
-            return result.scalars().all()
+            return list(result.scalars().all())
 
     async def insert(self, instance: BaseModel) -> bool:
         if not self.session:
@@ -169,7 +171,7 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
                 session.add(new_entry)
                 await session.commit()
             except Exception as entry_insertion_error:
-                logging.exception("[DB] Failed to insert instance", exc_info=entry_insertion_error)
+                logger.exception("Failed to insert instance", exc_info=entry_insertion_error)
                 await session.rollback()
                 return False
             else:
@@ -179,5 +181,5 @@ class PostgresDatabaseService(AbstractDatabaseService, config=PostgresConfigurat
         if model.__name__ not in self._models_cache:
             sql_model = convert_pydantic_model_to_sqlalchemy_base(model)
             await self.ensure_table(sql_table_model=sql_model)
-            logging.info(f"[DB] Registered model {model.__name__} as {sql_model.__name__}")
+            logger.info("Registered model %s as %s", model.__name__, sql_model.__name__)
             self._models_cache[model.__name__] = sql_model

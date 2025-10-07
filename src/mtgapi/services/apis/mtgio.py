@@ -9,6 +9,8 @@ from mtgapi.config.settings.services import MTGIOAPIConfiguration
 from mtgapi.domain.card import MTGCard, MTGIOCard
 from mtgapi.services.http import AbstractAsyncHTTPClientService
 
+logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfiguration):
@@ -59,8 +61,8 @@ class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfigurati
         if not card_name:
             raise ValueError(f"Card with identifier '{identifier}' not found or has no name.")
 
-        logging.info(f"[INFO] Found card [[{card_name}]] on MTGIO API.")
-        logging.debug(found_card_data)
+        logger.info("Found card [[%s]] on MTGIO API.", card_name)
+        logger.debug(found_card_data)
 
         return MTGIOCard.from_api_payload(found_card_data) if not raw else found_card_data
 
@@ -69,16 +71,14 @@ class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfigurati
         Fetches the image of a card from the MTGIO API.
         """
         if not card.image_url:
-            logging.warning(f"[WARNING] Card [[{card.name}]] has no image URL.")
+            logger.warning("Card [[%s]] has no image URL.", card.name)
             return None
 
         try:
             response = await self.get(url=card.image_url, override_base=True)
             response.raise_for_status()
         except httpx.HTTPStatusError as card_image_retrieval_error:
-            logging.exception(
-                f"[ERROR] Failed to fetch image for card [[{card.name}]]", exc_info=card_image_retrieval_error
-            )
+            logger.exception("Failed to fetch image for card [[%s]]", card.name, exc_info=card_image_retrieval_error)
             return None
         else:
-            return response.content
+            return bytes(response.content)

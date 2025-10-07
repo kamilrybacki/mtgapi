@@ -1,7 +1,7 @@
 import logging
 import re
 from enum import StrEnum
-from typing import Any, ClassVar, TypedDict
+from typing import ClassVar, TypedDict
 
 from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import declarative_base
@@ -530,7 +530,8 @@ class MTGCard(BaseModel):
     @classmethod
     def from_mtgio_card(cls, card: MTGIOCard) -> "MTGCard":
         """Convert MTGIOCard to MTGCard."""
-        logging.info(f"Converting MTGIOCard '{card.names[0]}' with ID '{card.id}' to MTGCard.")
+        logger = logging.getLogger(__name__)
+        logger.info("Converting MTGIOCard '%s' with ID '%s' to MTGCard.", card.names[0], card.id)
         return cls(
             id=card.id,
             multiverse_id=card.multiverse_id,
@@ -551,8 +552,25 @@ class MTGCard(BaseModel):
         )
 
     @classmethod
-    def null(cls) -> Any:
-        return None
+    def null(cls) -> "MTGCard":
+        return cls(
+            id="",
+            multiverse_id="",
+            name="",
+            aliases=[],
+            rulings=[],
+            mana_value=ManaValue(),
+            types=[],
+            subtypes=[],
+            keywords=[],
+            text="",
+            flavor="",
+            power=None,
+            toughness=None,
+            rarity=None,
+            set_name=None,
+            image_url="",
+        )
 
     def __bool__(self) -> bool:
         return bool(self.id and self.name)

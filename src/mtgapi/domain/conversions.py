@@ -1,7 +1,7 @@
 import enum
 import logging
-from types import NoneType, UnionType
-from typing import get_args, get_origin
+from types import NoneType
+from typing import Any, get_args, get_origin
 
 import sqlalchemy
 from pydantic import BaseModel
@@ -11,12 +11,11 @@ from sqlalchemy.orm.decl_api import DeclarativeBase
 from mtgapi.common.exceptions import EmptyPydanticModelError
 from mtgapi.config.settings.defaults import CONVERTED_PYDANTIC_MODEL_SUFFIX
 
+logger = logging.getLogger(__name__)
+
 
 class TypeAnnotationToSQLFieldType(enum.Enum):
-    """
-    Class which maps the type annotations of Pydantic models to SQLAlchemy field types
-    e.g. the int type hint gets mapped to the sqlalchemy.Integer type for a column
-    """
+    """Backward-compatible enum used by tests to assert mapped SQLAlchemy types."""
 
     int = sqlalchemy.Integer
     str = sqlalchemy.String
@@ -26,6 +25,12 @@ class TypeAnnotationToSQLFieldType(enum.Enum):
     bytes = sqlalchemy.LargeBinary
     list = sqlalchemy.ARRAY
     dict = sqlalchemy.JSON
+
+
+# Internal mapping drives conversion logic (mirrors enum values)
+PRIMITIVE_TYPE_MAP: dict[str, Any] = {
+    name: member.value for name, member in TypeAnnotationToSQLFieldType.__members__.items()
+}
 
 
 def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[DeclarativeBase]:  # noqa: PLR0912
@@ -38,52 +43,60 @@ def convert_pydantic_model_to_sqlalchemy_base(model: type[BaseModel]) -> type[De
     """
     base = declarative_base(class_registry={})
 
-    column_definitions: dict[str, sqlalchemy.Column] = {}
+    column_definitions: dict[str, sqlalchemy.Column[Any]] = {}
     if len(model.model_fields.keys()) == 0:
         raise EmptyPydanticModelError
 
     for field_name, field in model.model_fields.items():
         field_type = field.annotation
         if field_type is None:
-            logging.debug(f"[DEBUG] Field {field_name} has no annotation")
+            logger.debug("Field %s has no annotation", field_name)
             continue
 
-        if isinstance(field_type, UnionType):
-            field_type = get_args(field_type)[0]  # type: ignore
+        origin_union = get_origin(field_type)
+        # Unwrap Optional/Union: take first non-None argument
+        if origin_union is not None and origin_union is getattr(field_type, "__class__", object()):
+            union_args = [a for a in get_args(field_type) if a is not type(None)]
+            if union_args:
+                field_type = union_args[0]
 
-        try:
-            type_name = get_origin(field_type).__name__  # type: ignore
-        except AttributeError:
-            type_name = field_type.__name__
-
-        logging.info(f"[DEBUG] Field {field_name} is {type_name}")
-
-        if type_name not in TypeAnnotationToSQLFieldType.__members__:
-            logging.debug(f"[DEBUG] Field [[{field_name}]] type {field_type} is not a primitive! Using JSON type.")
-            mapped_column_type = TypeAnnotationToSQLFieldType.dict
+        origin = get_origin(field_type)  # e.g. list[int]
+        if origin is not None:  # generic alias like list[int]
+            type_name = origin.__name__
         else:
-            mapped_column_type = TypeAnnotationToSQLFieldType[type_name]
+            # Might be a class/typeobject
+            type_name = getattr(field_type, "__name__", field_type.__class__.__name__)
 
-        if mapped_column_type == TypeAnnotationToSQLFieldType.list:
-            type_arguments = get_args(field_type)
-            field_nested_type_name = type_arguments[0].__name__ if type_arguments else NoneType.__name__
-            if field_nested_type_name not in TypeAnnotationToSQLFieldType.__members__:
-                logging.debug(
-                    f"[DEBUG] Field [[{field_name}]] nested members type is not a primitive! Using JSON type."
+        logger.debug("Field %s is %s", field_name, type_name)
+
+        if type_name not in PRIMITIVE_TYPE_MAP:
+            logger.debug("Field [[%s]] type %s not primitive. Using JSON.", field_name, field_type)
+            sa_type: Any = PRIMITIVE_TYPE_MAP["dict"]
+        else:
+            sa_type = PRIMITIVE_TYPE_MAP[type_name]
+
+        if sa_type is PRIMITIVE_TYPE_MAP["list"]:
+            type_args = get_args(field_type)
+            nested_type_name = type_args[0].__name__ if type_args else NoneType.__name__
+            if nested_type_name not in PRIMITIVE_TYPE_MAP:
+                logger.debug(
+                    "Field [[%s]] nested member type %s not primitive. Using JSON element type.",
+                    field_name,
+                    nested_type_name,
                 )
-                nested_type = TypeAnnotationToSQLFieldType.dict.value
+                element_type: Any = PRIMITIVE_TYPE_MAP["dict"]
             else:
-                nested_type = TypeAnnotationToSQLFieldType[field_nested_type_name].value  # type: ignore
-
-            mapped_column_type = mapped_column_type.value(item_type=nested_type)
+                element_type = PRIMITIVE_TYPE_MAP[nested_type_name]
+            # build an ARRAY of the element type
+            resolved_column_type: Any = sa_type(element_type)
         else:
-            mapped_column_type = mapped_column_type.value
+            resolved_column_type = sa_type
 
-        new_column_from_field = sqlalchemy.Column(type_=mapped_column_type)  # type: ignore
+        new_column_from_field: sqlalchemy.Column[Any] = sqlalchemy.Column(type_=resolved_column_type)
         column_definitions[field_name] = new_column_from_field
 
     if "id" not in column_definitions:
-        logging.debug("[DEBUG] No 'id' field found in the Pydantic model, adding an auto-incrementing primary key.")
+        logger.debug("No 'id' field found in the Pydantic model, adding an auto-incrementing primary key.")
         column_definitions["id"] = sqlalchemy.Column(
             type_=sqlalchemy.Integer,
         )

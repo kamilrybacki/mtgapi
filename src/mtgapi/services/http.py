@@ -14,6 +14,8 @@ from mtgapi.services import AuxiliaryServiceNames
 from mtgapi.services.base import AbstractAsyncService
 from mtgapi.services.proxy import AbstractProxyService, NullProxyService
 
+logger = logging.getLogger(__name__)
+
 
 @dataclasses.dataclass
 class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
@@ -61,7 +63,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
         proxy_service: AbstractProxyService = Provide[AuxiliaryServiceNames.PROXY],
     ) -> AbstractProxyService:
         if AbstractProxyService not in proxy_service.__class__.__bases__:
-            logging.error("[HTTP] Injected proxy service is not an instance of AbstractProxyService.")
+            logger.error("Injected proxy service is not an instance of AbstractProxyService.")
             return NullProxyService()
         return proxy_service
 
@@ -85,7 +87,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
             Create an instance of httpx.AsyncClient with the provided configuration.
             """
             if self._proxy_provider is None:
-                logging.warning("[HTTP] Proxy provider is not initialized. Using no proxy.")
+                logger.warning("Proxy provider is not initialized. Using no proxy.")
                 return httpx.AsyncClient(
                     timeout=httpx.Timeout(config.timeout),
                     headers=self.construct_headers(config),
@@ -94,7 +96,7 @@ class AbstractAsyncHTTPClientService(AbstractAsyncService, abc.ABC):
             proxy = await self._proxy_provider.get_proxy()
 
             if proxy is None or (not proxy.http and not proxy.https):
-                logging.info("[HTTP] No proxy configured. Connecting directly.")
+                logger.info("No proxy configured. Connecting directly.")
                 return httpx.AsyncClient(
                     timeout=httpx.Timeout(config.timeout),
                     headers=self.construct_headers(config),

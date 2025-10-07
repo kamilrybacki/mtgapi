@@ -6,6 +6,8 @@ from mtgapi.domain.card import MTGCard
 from mtgapi.services import AuxiliaryServiceNames
 from mtgapi.services.database import PostgresDatabaseService
 
+logger = logging.getLogger(__name__)
+
 
 @inject
 async def retrieve_card_data_from_cache(
@@ -25,14 +27,14 @@ async def retrieve_card_data_from_cache(
     try:
         results = await database.get_objects(object_type=MTGCard, filters={"multiverse_id": identifier})
         if not results:
-            logging.info(f"[CACHE] No data for id={identifier} present in cache")
-            return MTGCard.null()  # type: ignore
+            logger.info("No data for id=%s present in cache", identifier)
+            return MTGCard.null()
     except Exception as encountered_exception:
-        logging.exception("[CACHE] Failed to retrieve cached card data", exc_info=encountered_exception)
-        return MTGCard.null()  # type: ignore
+        logger.exception("Failed to retrieve cached card data", exc_info=encountered_exception)
+        return MTGCard.null()
 
-    data: MTGCard = results[0]  # type: ignore
-    logging.info(f"[CACHE] Retrieved cached data for id={identifier}: {data.name}")
+    data: MTGCard = results[0]
+    logger.info("Retrieved cached data for id=%s: %s", identifier, data.name)
     return MTGCard(**data.__dict__)
 
 
@@ -54,8 +56,8 @@ async def cache_card_data(
     try:
         insertion_result = await database.insert(instance=card)
         if not insertion_result:
-            logging.error(f"[CACHE] Failed to cache card data for id={card.id}")
+            logger.error("Failed to cache card data for id=%s", card.id)
     except Exception as encountered_exception:
-        logging.exception("[CACHE] Failed to cache card data", exc_info=encountered_exception)
+        logger.exception("Failed to cache card data", exc_info=encountered_exception)
     else:
-        logging.info(f"[CACHE] Cached card data for id={card.id}")
+        logger.info("Cached card data for id=%s", card.id)
