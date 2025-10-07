@@ -1,7 +1,18 @@
 version: '3'
 
 vars:
-  FULL_PACKAGER_COMMAND: ".venv/bin/python -m poetry"
+  # Use the globally installed poetry (as set up in CI) if available, otherwise
+  # fall back to invoking via python -m poetry inside the venv. This prevents
+  # failures like: ".venv/bin/python -m poetry run ruff ..." when poetry isn't
+  # installed inside the project virtualenv (we usually install it globally).
+  FULL_PACKAGER_COMMAND: |
+    if command -v poetry >/dev/null 2>&1; then
+      echo poetry
+    elif [ -x .venv/bin/poetry ]; then
+      echo .venv/bin/poetry
+    else
+      echo ".venv/bin/python -m poetry"
+    fi
 
 tasks:
   install-dev:
@@ -38,40 +49,51 @@ tasks:
       - task: enable-pre-commit
 
   lint:
-    desc: Run linters and formatters
+    desc: Run linters and type checker (auto-fix first, then strict)
     cmds:
-      # Preliminary auto-fix (format + safe fixes) before strict check
-      - "{{.FULL_PACKAGER_COMMAND}} run ruff format --config pyproject.toml"
-      - "{{.FULL_PACKAGER_COMMAND}} run ruff check --fix --config pyproject.toml || true"
-      - "{{.FULL_PACKAGER_COMMAND}} run ruff check --config pyproject.toml"
-      - "{{.FULL_PACKAGER_COMMAND}} run mypy . --config-file pyproject.toml"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        echo "Using package command: $POETRY_CMD"
+        $POETRY_CMD run ruff format --config pyproject.toml
+        $POETRY_CMD run ruff check --fix --config pyproject.toml || true
+        $POETRY_CMD run ruff check --config pyproject.toml
+        $POETRY_CMD run mypy . --config-file pyproject.toml
 
   format:
-    desc: Format the codebase
+    desc: Format the codebase (idempotent)
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run ruff format --config pyproject.toml"
-      - "{{.FULL_PACKAGER_COMMAND}} run ruff check --fix --config pyproject.toml >> /dev/null || exit 0"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run ruff format --config pyproject.toml
+        # Attempt safe fixes; ignore non-zero exit due to residual issues.
+        $POETRY_CMD run ruff check --fix --config pyproject.toml >/dev/null || true
 
   test:
     desc: Run tests
     env:
       TESTCONTAINERS_HOST_OVERRIDE: "127.0.0.1"
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run pytest --config-file pyproject.toml -svv"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run pytest --config-file pyproject.toml -svv
 
   test-chosen:
     desc: Run tests marked as "chosen"
     env:
       TESTCONTAINERS_HOST_OVERRIDE: "127.0.0.1"
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run pytest --config-file pyproject.toml -svv -m 'chosen'"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run pytest --config-file pyproject.toml -svv -m 'chosen'
 
   test-offline:
     desc: Run tests that can be run offline
     env:
       TESTCONTAINERS_HOST_OVERRIDE: "127.0.0.1"
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run pytest --config-file pyproject.toml -svv -m 'offline'"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run pytest --config-file pyproject.toml -svv -m 'offline'
 
   start-api:
     desc: Start the API server
@@ -100,40 +122,56 @@ tasks:
   docs-build:
     desc: Build MkDocs site into site/
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run mkdocs build --strict"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run mkdocs build --strict
 
   docs-serve:
     desc: Serve MkDocs with live reload
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run mkdocs serve -a 0.0.0.0:8001"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run mkdocs serve -a 0.0.0.0:8001
 
   security-scan:
     desc: Run Bandit security scan
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run bandit -q -r src -f screen --exclude tests"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run bandit -q -r src -f screen --exclude tests
 
   dependency-audit:
     desc: Run pip-audit on exported requirements
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} export -f requirements.txt --output requirements.txt --without-hashes"
-      - "{{.FULL_PACKAGER_COMMAND}} run pip-audit -r requirements.txt --progress-spinner=off"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD export -f requirements.txt --output requirements.txt --without-hashes
+        $POETRY_CMD run pip-audit -r requirements.txt --progress-spinner=off
 
   export-schemas:
     desc: Export JSON schemas for domain models
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run python scripts/export_schemas.py"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run python scripts/export_schemas.py
 
   export-openapi:
     desc: Export OpenAPI schema to docs/_generated_openapi
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run python scripts/export_openapi.py"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run python scripts/export_openapi.py
 
   enable-pre-commit:
     desc: Install pre-commit hooks locally
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run pre-commit install --install-hooks"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run pre-commit install --install-hooks
 
   pre-commit-run-all:
     desc: Run all pre-commit hooks against the entire codebase
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} run pre-commit run --all-files"
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run pre-commit run --all-files
