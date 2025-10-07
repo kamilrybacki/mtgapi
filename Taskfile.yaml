@@ -93,3 +93,34 @@ tasks:
     cmds:
       - docker build -f {{.DOCKERFILE}} -t {{.IMAGE_NAME}}:latest .
       - docker push {{.IMAGE_NAME}}:latest
+
+  docs-build:
+    desc: Build MkDocs site into site/
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run mkdocs build --strict"
+
+  docs-serve:
+    desc: Serve MkDocs with live reload
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run mkdocs serve -a 0.0.0.0:8001"
+
+  security-scan:
+    desc: Run Bandit security scan
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run bandit -q -r src -f screen --exclude tests"
+
+  dependency-audit:
+    desc: Run pip-audit on exported requirements
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} export -f requirements.txt --output requirements.txt --without-hashes"
+      - "{{.FULL_PACKAGER_COMMAND}} run pip-audit -r requirements.txt --progress-spinner=off"
+
+  export-schemas:
+    desc: Export JSON schemas for domain models
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run python scripts/export_schemas.py"
+
+  export-openapi:
+    desc: Export OpenAPI schema to docs/_generated_openapi
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run python scripts/export_openapi.py"

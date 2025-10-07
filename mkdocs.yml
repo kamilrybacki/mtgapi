@@ -1,0 +1,50 @@
+site_name: MTG API Docs
+site_description: Documentation for the MTG Card Info API service.
+site_url: https://example.com/mtgapi
+repo_url: https://github.com/kamilrybacki/mtgcobuilder-api
+repo_name: kamilrybacki/mtgcobuilder-api
+edit_uri: edit/main/docs/
+nav:
+  - Home: index.md
+  - Architecture: architecture.md
+  - Configuration: configuration.md
+  - API Usage: api.md
+  - Development: development.md
+  - Migration: migration.md
+  - Schemas: schemas.md
+  - OpenAPI: openapi.md
+
+theme:
+  name: material
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - content.action.edit
+  palette:
+    - media: '(prefers-color-scheme: light)'
+      scheme: default
+      primary: indigo
+      accent: deep purple
+    - media: '(prefers-color-scheme: dark)'
+      scheme: slate
+      primary: indigo
+      accent: deep purple
+markdown_extensions:
+  - admonition
+  - codehilite
+  - toc:
+      permalink: true
+  - footnotes
+  - tables
+  - attr_list
+  - def_list
+  - md_in_html
+plugins:
+  - search
+  - include-markdown
+extra:
+  version:
+    provider: markdown

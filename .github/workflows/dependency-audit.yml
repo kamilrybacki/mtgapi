@@ -1,0 +1,156 @@
+name: dependency-audit
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 3 * * *'
+  workflow_dispatch:
+    inputs:
+      fail-on-severity:
+        description: 'Minimum severity that will fail the job (none, low, medium, high, critical)'
+        required: false
+        default: 'high'
+
+permissions:
+  contents: read
+
+jobs:
+  pip-audit:
+    runs-on: ubuntu-latest
+    env:
+      FAIL_ON_SEVERITY: ${{ github.event.inputs.fail-on-severity || 'high' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install dependencies
+        run: |
+          poetry install --with dev
+
+      - name: Export requirements
+        run: |
+          poetry export -f requirements.txt --output requirements.txt --without-hashes
+
+      - name: Run pip-audit (JSON)
+        run: |
+          set -e
+          poetry run pip-audit -r requirements.txt --progress-spinner=off -f json > audit.json || true
+          echo "Saved audit report to audit.json"
+
+      - name: Evaluate vulnerabilities & generate summary
+        id: evaluate
+        run: |
+          python - <<'PY'
+          import json, os, sys, pathlib
+          REPORT = pathlib.Path('audit.json')
+          fail_on = os.getenv('FAIL_ON_SEVERITY','high').lower()
+          order = ['none','low','medium','high','critical']
+          if fail_on not in order:
+              print(f"Unknown fail-on severity '{fail_on}', defaulting to 'high'")
+              fail_on = 'high'
+          threshold_index = order.index(fail_on)
+          if not REPORT.is_file():
+              print('audit.json missing – failing')
+              sys.exit(1)
+          data = json.loads(REPORT.read_text(encoding='utf-8') or '[]')
+          entries = data if isinstance(data, list) else data.get('dependencies', [])
+          collected = []
+          counts = {s:0 for s in order[1:]}
+          for dep in entries:
+              vulns = (dep or {}).get('vulnerabilities') or []
+              for v in vulns:
+                  sev = (v.get('severity') or 'UNKNOWN').lower()
+                  if sev in counts:
+                      counts[sev]+=1
+                  collected.append({
+                      'package': dep.get('name'),
+                      'version': dep.get('version'),
+                      'id': v.get('id'),
+                      'severity': sev,
+                      'fix_versions': ', '.join(v.get('fix_versions') or []) or '-',
+                  })
+          # Build step summary markdown
+          lines = []
+          lines.append("### Dependency Vulnerability Audit Summary")
+          if collected:
+              lines.append('\n| Package | Version | Advisory | Severity | Fix Versions |')
+              lines.append('|---------|---------|----------|----------|--------------|')
+              for c in collected:
+                  lines.append(f"| {c['package']} | {c['version']} | {c['id']} | {c['severity'].upper()} | {c['fix_versions']} |")
+          else:
+              lines.append('\nNo vulnerabilities reported by pip-audit.')
+          lines.append('\n#### Counts by Severity')
+          lines.append('| Severity | Count |')
+          lines.append('|----------|-------|')
+          for sev in ['critical','high','medium','low']:
+              lines.append(f"| {sev.upper()} | {counts.get(sev,0)} |")
+          summary = '\n'.join(lines)
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a',encoding='utf-8') as fh:
+              fh.write(summary + '\n')
+          def sev_index(s: str) -> int:
+              return order.index(s) if s in order else -1
+          failing = [c for c in collected if sev_index(c['severity']) >= threshold_index and threshold_index>0]
+          badge_status = 'passing'
+          color = 'brightgreen'
+          if failing:
+              badge_status = f"fail ({len(failing)})"
+              color = 'red'
+          elif any(counts[s]>0 for s in ['high','critical']):
+              color = 'yellow'
+          outputs = {
+              'failing_count': len(failing),
+              'fail_on': fail_on,
+              'badge_status': badge_status,
+              'badge_color': color,
+          }
+          with open(os.getenv('GITHUB_OUTPUT'),'a',encoding='utf-8') as out:
+              for k,v in outputs.items():
+                  out.write(f"{k}={v}\n")
+          if failing:
+              print(f"Failing due to {len(failing)} vulnerabilities meeting threshold '{fail_on}'")
+              sys.exit(1)
+          print('No vulnerabilities meeting failure threshold.')
+          PY
+
+      - name: Generate badge JSON (scheduled or manual runs)
+        if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+        run: |
+          mkdir -p badges
+          cat > badges/dependency_audit.json <<EOF
+          {
+            "schemaVersion": 1,
+            "label": "deps audit",
+            "message": "${{ steps.evaluate.outputs.badge_status }}",
+            "color": "${{ steps.evaluate.outputs.badge_color }}"
+          }
+          EOF
+
+      - name: Commit badge JSON
+        if: ${{ (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch') && steps.evaluate.outputs.badge_status != '' }}
+        run: |
+          if [ -n "$(git status --porcelain badges/dependency_audit.json 2>/dev/null)" ]; then
+            git config user.name "github-actions"
+            git config user.email "actions@users.noreply.github.com"
+            git add badges/dependency_audit.json
+            git commit -m "chore: update dependency audit badge (${GITHUB_RUN_ID})" || true
+            git push || echo "(Non-fatal) Push failed; perhaps no permission on PR run." || true
+          else
+            echo "No badge changes to commit"
+          fi
+
+      - name: Upload audit report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-audit-report
+          path: audit.json

@@ -47,3 +47,18 @@ jobs:
 
       - name: Run Ruff
         run: poetry run ruff check --config pyproject.toml
+
+  bandit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup environment (Poetry + caches)
+        uses: ./.github/actions/setup-poetry
+        with:
+          python-version: '3.12'
+          poetry-version: ${{ env.POETRY_VERSION }}
+          install-deps: 'true'
+          cache-key-suffix: '-bandit'
+      - name: Run Bandit (security scan)
+        run: poetry run bandit -q -r src -f txt --exclude tests || (echo "Bandit scan failed" && exit 1)

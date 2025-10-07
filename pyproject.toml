@@ -29,6 +29,13 @@ testcontainers = "^4.10.0"
 types-requests = "^2.32.4.20250611"
 imagehash = "^4.3.2"
 pillow = "^11.2.1"
+coverage = "^7.6.0"
+coverage-badge = "^1.1.0"
+mkdocs = "^1.6.0"
+mkdocs-material = "^9.5.0"
+bandit = "^1.7.9"
+pip-audit = "^2.7.3"
+mkdocs-include-markdown-plugin = "^6.0.0"
 
 [build-system]
 requires = ["poetry-core"]
