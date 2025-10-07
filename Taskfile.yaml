@@ -124,3 +124,13 @@ tasks:
     desc: Export OpenAPI schema to docs/_generated_openapi
     cmds:
       - "{{.FULL_PACKAGER_COMMAND}} run python scripts/export_openapi.py"
+
+  enable-pre-commit:
+    desc: Install pre-commit hooks locally
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run pre-commit install --install-hooks"
+
+  pre-commit-run-all:
+    desc: Run all pre-commit hooks against the entire codebase
+    cmds:
+      - "{{.FULL_PACKAGER_COMMAND}} run pre-commit run --all-files"

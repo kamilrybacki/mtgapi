@@ -229,8 +229,9 @@ Contributions welcome! To contribute:
 1. Fork & branch
 2. `task install-dev`
 3. Add tests for changes
-4. Run `task lint && task test`
-5. Open PR
+4. (Optional) Enable git hooks: `task enable-pre-commit`
+5. Run `task lint && task test`
+6. Open PR
 
 Issues / feature requests encouraged.
 
@@ -251,6 +252,13 @@ task dependency-audit
 ```
 
 CI runs a scheduled dependency audit (and on pushes/PRs) with a configurable failure threshold.
+
+Lock consistency is enforced by a separate workflow (`lock-consistency.yml`) which runs `poetry lock --no-update` and fails if the resulting `poetry.lock` hash changes (indicating drift or an uncommitted lock refresh). Run it locally with:
+
+```bash
+poetry lock --no-update
+git diff --exit-code poetry.lock   # should produce no changes
+```
 
 Badge (generated on the nightly schedule or manual dispatch) will appear once `badges/dependency_audit.json` is committed. Example (after first schedule run):
 
@@ -293,6 +301,26 @@ python scripts/quick_fail_on_severity.py --report audit.json --fail-on high
 ```
 
 (`scripts/quick_fail_on_severity.py` can be added later if you want a local mirror of CI logic.)
+
+### Pre-commit Hooks
+
+Install and run hooks locally (Ruff lint/format, mypy, Bandit, whitespace hygiene):
+
+```bash
+task enable-pre-commit      # one-time setup
+task pre-commit-run-all     # run hooks against entire repo
+```
+
+Hooks run automatically on staged changes after installation.
+
+Additional manual hooks (not run automatically):
+
+```bash
+pre-commit run ruff-fix -a              # apply auto-fixes (stages: manual)
+pre-commit run poetry-lock-no-update    # validate lock reproducibility without upgrades
+```
+
+These are marked with `stages: [manual]` to avoid slowing normal commits; invoke them explicitly when needed.
 
 ### Schema Export
 

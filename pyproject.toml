@@ -126,3 +126,8 @@ markers = [
     "offline: tests that can be carried out offline",
     "chosen: helper marker for running only chosen tests with `test-chosen` command",
 ]
+
+[tool.coverage.run]
+omit = [
+    "*/dependency_injector/*",
+]

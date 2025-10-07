@@ -1,0 +1,69 @@
+name: lock-consistency
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '15 4 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  check-lock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Poetry
+        run: pip install poetry
+
+      - name: Install plugin (export) & deps (no dev needed)
+        run: |
+          poetry self add poetry-plugin-export || true
+          poetry install --no-root --only main
+
+      - name: Capture pre-lock hash
+        id: before
+        run: |
+          echo "hash=$(sha256sum poetry.lock | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Run lock (no update)
+        run: |
+          poetry lock --no-update
+
+      - name: Compare lock hash
+        id: compare
+        run: |
+          after_hash=$(sha256sum poetry.lock | cut -d' ' -f1)
+          echo "after_hash=$after_hash" >> "$GITHUB_OUTPUT"
+          if [ "$after_hash" != "${{ steps.before.outputs.hash }}" ]; then
+            echo "Lockfile changed after 'poetry lock --no-update'."
+            git --no-pager diff --color=always poetry.lock || true
+            echo "::error::Lock drift detected. Run 'poetry lock --no-update' locally and commit the result." >&2
+            exit 1
+          fi
+          echo "Lockfile stable (no drift)."
+
+      - name: Summarize
+        if: always()
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<EOF
+          ### Lock Consistency Report
+
+          Original hash: \
+          	${{ steps.before.outputs.hash }}  
+          After hash: \
+          	${{ steps.compare.outputs.after_hash }}  
+
+          Result: $([ "${{ steps.before.outputs.hash }}" = "${{ steps.compare.outputs.after_hash }}" ] && echo "✅ Stable" || echo "❌ Drift Detected")
+          EOF

@@ -13,34 +13,33 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Callable, Dict, Iterable, Tuple
+from typing import Any, Iterable
 
 from mtgapi.domain.card import MTGCard, MTGIOCard, ManaValue
 
 OUTPUT_DIR = Path(__file__).parent.parent / "docs" / "_generated_schemas"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-MODELS: Dict[str, Any] = {
+MODELS: dict[str, Any] = {
     "mtg_card.schema.json": MTGCard,
     "mtgio_card.schema.json": MTGIOCard,
     "mana_value.schema.json": ManaValue,
 }
 
-def _get_schema(model: Any) -> Dict[str, Any]:
+def _get_schema(model: Any) -> dict[str, Any]:
     """Return a JSON schema for the given Pydantic model.
 
-    Uses ``model_json_schema`` (Pydantic v2). If running under a subtly
-    different environment (type checker / plugin discrepancy), falls back to
-    ``schema()`` to satisfy mypy attr checks.
+    Tries ``model_json_schema`` (Pydantic v2) then ``schema`` (legacy) for
+    compatibility in type checking contexts.
     """
     if hasattr(model, "model_json_schema"):
-        return getattr(model, "model_json_schema")()  # type: ignore[no-any-return]
+        return model.model_json_schema()  # type: ignore[no-any-return]
     if hasattr(model, "schema"):
-        return getattr(model, "schema")()  # type: ignore[no-any-return]
+        return model.schema()  # type: ignore[no-any-return]
     raise AttributeError(f"Model {model!r} lacks a known schema export method")
 
 
-def export() -> Iterable[Tuple[str, Path]]:
+def export() -> Iterable[tuple[str, Path]]:
     """Export all configured model schemas.
 
     Returns an iterable of (filename, path) pairs for potential logging or

@@ -25,5 +25,5 @@ def export() -> Path:
     return OUT_FILE
 
 if __name__ == "__main__":  # pragma: no cover
-    # Avoid stdout noise (Ruff T201) – just ensure export occurs.
+    # Avoid stdout noise (Ruff T201) - just ensure export occurs.
     export()
