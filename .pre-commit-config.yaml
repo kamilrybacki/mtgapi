@@ -12,25 +12,47 @@ repos:
         alias: ruff-fix
         stages: [manual]
         args: ["--config", "pyproject.toml", "--fix"]
+
+  # Mypy hook without relying on Poetry binary availability. Pre-commit will
+  # create an isolated venv and install mypy plus our runtime deps needed for type checking.
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.15.0
     hooks:
       - id: mypy
-        name: mypy (strict)
-        additional_dependencies: []
-        args: ["--config-file", "pyproject.toml"]
+        name: mypy (strict, project-wide)
+        # We run on the whole tree; mypy config already excludes/overrides as needed.
+        args: ["--config-file", "pyproject.toml", "."]
+        additional_dependencies:
+          # Align versions with pyproject to avoid mismatch warnings.
+          - mypy==1.15.0
+          - fastapi>=0.115.0,<0.200.0
+          - uvicorn==0.29.0
+          - sqlalchemy[asyncio]==2.0.16
+          - asyncpg==0.30.0
+          - environ-config==24.1.0
+          - nest-asyncio==1.6.0
+          - httpx==0.28.1
+          - tenacity==9.1.2
+          - dependency-injector==4.46.0
+          - imagehash==4.3.2
+          - pillow==11.2.1
+          - types-requests==2.32.4.20250611
+        pass_filenames: false
+
   - repo: https://github.com/PyCQA/bandit
     rev: 1.7.9
     hooks:
       - id: bandit
         args: ["-q", "-r", "src", "--exclude", "tests"]
         pass_filenames: false
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.6.0
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
       - id: check-added-large-files
+
   - repo: local
     hooks:
       - id: poetry-lock-check

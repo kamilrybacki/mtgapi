@@ -19,21 +19,21 @@ async def test_getting_existing_cache_entry() -> None:
     with use_postgres_container():
         services = wire_services()
         postgres_service: PostgresDatabaseService = getattr(services, AuxiliaryServiceNames.DATABASE)()
-        target_card_id = LIGHTNING_BOLT_MTG_CARD_DATA.get("multiverse_id")
+        target_card_id = LIGHTNING_BOLT_MTG_CARD_DATA.get("multiverse_id", "")
         if target_card_id is None:
             raise ValueError("Test data must have a 'multiverse_id' field. Check test samples.")
 
         logging.info("[TEST] Testing getting non-existing cache entry")
-        null_cache_entry = await retrieve_card_data_from_cache(target_card_id)
+        null_cache_entry = await retrieve_card_data_from_cache(target_card_id)  # type: ignore
         assert null_cache_entry == MTGCard.null()
         logging.info("[TEST] Confirmed no cache entry exists for id=%s", target_card_id)
 
-        instance_to_insert = MTGCard(**LIGHTNING_BOLT_MTG_CARD_DATA)
+        instance_to_insert = MTGCard(**LIGHTNING_BOLT_MTG_CARD_DATA)  # type: ignore
 
         logging.info(f"[TEST] Inserting instance into database: {instance_to_insert}")
         await postgres_service.insert(instance_to_insert)
 
-        cached_entry = await retrieve_card_data_from_cache(target_card_id)
+        cached_entry = await retrieve_card_data_from_cache(target_card_id)  # type: ignore
         assert cached_entry != MTGCard.null()
 
         logging.info(f"[TEST] Retrieved cached entry: {cached_entry}")
