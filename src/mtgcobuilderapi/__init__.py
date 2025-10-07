@@ -1,4 +1,5 @@
-"""Backward compatibility shim for the old 'mtgcobuilderapi' package name.
+"""
+Backward compatibility shim for the old 'mtgcobuilderapi' package name.
 
 This package re-exports public symbols from the new 'mtgapi' package so that
 existing imports like `import mtgcobuilderapi.config.settings.api` continue to work.
@@ -16,4 +17,4 @@ _warnings.warn(
 )
 
 # Re-export by shallow import. If deeper submodules are needed, they will be loaded on demand.
-from mtgapi import *  # noqa: F401,F403
+from mtgapi import *  # noqa: F403
