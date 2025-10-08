@@ -10,20 +10,14 @@ poetry run python scripts/export_schemas.py
 
 ## MTGCard
 
-```json
 --8<-- "_generated_schemas/mtg_card.schema.json"
-```
 
 ## MTGIOCard
 
-```json
 --8<-- "_generated_schemas/mtgio_card.schema.json"
-```
 
 ## ManaValue
 
-```json
 --8<-- "_generated_schemas/mana_value.schema.json"
-```
 
 > These JSON schema fragments are embedded at build time via `mkdocs-include-markdown-plugin`.
