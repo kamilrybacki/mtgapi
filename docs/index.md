@@ -12,4 +12,3 @@ This service provides structured, cached access to Magic: The Gathering card dat
 - [Configuration](configuration.md)
 - [API Usage](api.md)
 - [Development](development.md)
-- [Migration](migration.md)

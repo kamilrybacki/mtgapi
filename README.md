@@ -38,10 +38,11 @@ It is intentionally not a full deck-building product.
 7. [Testing](#testing)
 8. [Docker & Container Image](#docker--container-image)
 9. [Examples](#examples)
-10. [Migration Notes](#migration-notes)
-11. [Roadmap](#roadmap)
-12. [Contributing](#contributing)
-13. [License](#license)
+10. [Domain Models](#domain-models-overview)
+11. [Services Layer](#services-layer-overview)
+12. [Roadmap](#roadmap)
+13. [Contributing](#contributing)
+14. [License](#license)
 
 ## Features
 
@@ -50,10 +51,18 @@ It is intentionally not a full deck-building product.
 - 🧩 Dependency Injector based wiring (`wire_services`)
 - 🗃️ Async Postgres integration (SQLAlchemy + asyncpg)
 - 🔄 External MTGIO API client with retry (tenacity)
-- 🧪 Layered test suites (unit, functional, integration)
+- 🧪 Layered test suites (unit, functional, integration) with future E2E path
 - 🐳 Container-first workflow (Dockerfile + compose)
 - 🛡️ Supply chain & dependency export integrity in CI (hash + non-empty check)
 - 🔧 Strict linting (Ruff) & typing (mypy)
+
+## Domain Models Overview
+
+See `docs/domain-models.md` for detailed rationale, evolution strategy, and schema export guidance.
+
+## Services Layer Overview
+
+High-level service orchestration patterns are described in `docs/services.md` (HTTP, caching, DB, proxy composition).
 
 ## Architecture
 
@@ -180,6 +189,9 @@ task init-project   # bootstrap project
 task lint           # ruff + mypy
 task test           # full tests
 task start-api      # docker compose up api + db
+task export-schemas # regenerate JSON Schemas (docs/_generated_schemas)
+task export-openapi # regenerate OpenAPI JSON (docs/_generated_openapi)
+task docs-refresh   # export schemas + OpenAPI then build docs
 ```
 
 ## Examples

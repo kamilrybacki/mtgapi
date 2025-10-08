@@ -10,7 +10,11 @@ nav:
   - Configuration: configuration.md
   - API Usage: api.md
   - Development: development.md
-  - Migration: migration.md
+  - Domain Models: domain-models.md
+  - Services: services.md
+  - Caching: caching.md
+  - Testing Strategy: testing-strategy.md
+  - Operations: operations.md
   - Schemas: schemas.md
   - OpenAPI: openapi.md
 
