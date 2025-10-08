@@ -131,6 +131,9 @@ tasks:
     cmds:
       - task: export-schemas
       - task: export-openapi
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run python scripts/update_schemas_markdown.py
       - task: docs-build
 
   docs-serve:
