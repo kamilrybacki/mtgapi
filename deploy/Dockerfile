@@ -30,9 +30,11 @@ RUN pip install --prefix /install -r requirements.txt
 # Install dev (test/tooling) dependencies to a separate prefix (optional layer for future test images)
 RUN pip install --prefix /install-dev -r requirements-dev.txt
 
-# Copy application source and install it (PEP 517 build via pip) so 'mtgapi' is importable
+# Copy project metadata needed for build (README, license) and application source, then install
+COPY README.md LICENSE ./
 COPY src ./src
-RUN pip install --prefix /install .
+# Editable install for faster iterative rebuilds (code changes don't require reinstalling deps).
+RUN pip install --prefix /install -e . --no-deps
 
 # ---------- Runtime stage ----------
 FROM python:3.12-slim AS runtime
@@ -68,9 +70,6 @@ RUN chmod +x /app/healthcheck.sh
 
 USER appuser
 
-# NOTE: Container healthcheck omitted because current linter rejects valid HEALTHCHECK syntax.
-# To enable later, uncomment one of the lines below (both forms are valid Docker syntax):
-# HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD /bin/sh /app/healthcheck.sh
-# HEALTHCHECK CMD curl -f http://127.0.0.1:8000/docs || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 CMD curl -f http://127.0.0.1:8000/docs || exit 1
 
 CMD ["python", "-m", "uvicorn", "mtgapi.entrypoint:API", "--host", "0.0.0.0", "--port", "8000"]
