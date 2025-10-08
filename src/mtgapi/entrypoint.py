@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Response
+from fastapi.responses import JSONResponse
 
 from mtgapi.config.settings.api import VERSION, APIConfiguration
 from mtgapi.config.settings.defaults import KNOWN_ID_EXCEPTIONS
@@ -65,3 +66,33 @@ async def get_card_image(
 ) -> Response:
     card_data_from_mtgio = await get_card(card_identifier, mtgio_service)
     return Response(content=await mtgio_service.get_card_image(card_data_from_mtgio), media_type="image/webp")
+
+
+@API.get("/metrics", tags=["_internal"], summary="Metrics (placeholder)")
+async def metrics_placeholder() -> JSONResponse:  # pragma: no cover - placeholder
+    """
+    Placeholder metrics endpoint.
+
+    Returns 501 until metrics collection (Prometheus / OTEL) is implemented.
+    """
+    return JSONResponse(status_code=501, content={"detail": "metrics not implemented"})
+
+
+@API.get("/_trace/test", tags=["_internal"], summary="Tracing probe (placeholder)")
+async def tracing_probe_placeholder() -> JSONResponse:  # pragma: no cover - placeholder
+    """
+    Placeholder trace test endpoint.
+
+    Will emit a span once tracing is wired. Useful for validating exporter config.
+    """
+    return JSONResponse(status_code=501, content={"detail": "tracing not implemented"})
+
+
+@API.get("/feature-flags", tags=["_internal"], summary="Feature flags (placeholder)")
+async def feature_flags_placeholder() -> JSONResponse:  # pragma: no cover - placeholder
+    """
+    Placeholder feature flags listing.
+
+    Future: integrate with a flag provider (e.g. LaunchDarkly, config file) and surface active flags.
+    """
+    return JSONResponse(status_code=501, content={"flags": {}, "detail": "feature flags not implemented"})
