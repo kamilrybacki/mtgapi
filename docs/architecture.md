@@ -17,3 +17,4 @@ FastAPI (entrypoint) -> Services (DI) -> { Cache | Postgres | External APIs }
 - Redis cache backend
 - Additional data sources (pricing, legality)
 - Observability (OpenTelemetry)
+- Enhanced caching strategies (see [Caching](caching.md) for current approach and roadmap)

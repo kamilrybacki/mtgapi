@@ -25,6 +25,9 @@ jobs:
       - name: Install deps
         run: |
           poetry install --with dev
+      - name: Refresh generated docs artifacts
+        run: |
+          poetry run task docs-refresh
       - name: Cache OpenAPI schema
         id: openapi-cache
         uses: actions/cache@v4

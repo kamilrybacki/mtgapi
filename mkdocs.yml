@@ -15,6 +15,8 @@ nav:
   - Caching: caching.md
   - Testing Strategy: testing-strategy.md
   - Operations: operations.md
+  - Metrics & Tracing: metrics-tracing.md
+  - Feature Flags: feature-flags.md
   - Schemas: schemas.md
   - OpenAPI: openapi.md
 
