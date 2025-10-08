@@ -126,6 +126,13 @@ tasks:
         POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
         $POETRY_CMD run mkdocs build --strict
 
+  docs-refresh:
+    desc: Export schemas & OpenAPI then build docs
+    cmds:
+      - task: export-schemas
+      - task: export-openapi
+      - task: docs-build
+
   docs-serve:
     desc: Serve MkDocs with live reload
     cmds:
