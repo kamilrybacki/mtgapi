@@ -40,14 +40,21 @@ jobs:
         run: |
           mkdir -p badges
           mv coverage.svg badges/coverage.svg
-          if git diff --quiet badges/coverage.svg 2>/dev/null; then
+          git add badges/coverage.svg
+          if git diff --cached --quiet; then
             echo "No coverage badge changes to commit"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add badges/coverage.svg
-          git commit -m "chore: update coverage badge" || echo "Nothing to commit"
+          # Extract percentage for richer commit message if coverage.xml exists
+          if [ -f coverage.xml ]; then
+            percent=$(grep -o 'line-rate="[0-9.]*"' coverage.xml | head -1 | cut -d '"' -f2)
+            pct=$(python -c "print(int(round(float('${percent}')*100)))") || pct="?"
+            git commit -m "chore: update coverage badge to ${pct}%" || echo "Nothing to commit"
+          else
+            git commit -m "chore: update coverage badge" || echo "Nothing to commit"
+          fi
           git push
       - name: Upload coverage badge artifact
         uses: actions/upload-artifact@v4
