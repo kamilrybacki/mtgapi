@@ -58,3 +58,7 @@ htmlcov/
 
 # Logs
 *.log
+
+# Generated schemas documentation
+docs/_generated_schemas
+docs/_generated_openapi
