@@ -30,7 +30,7 @@ Component schemas: **7**
 
 #### Full Specification
 
-???+ note 'Complete OpenAPI JSON'
+???+ note "Complete OpenAPI JSON"
     ```json
     {
       "openapi": "3.1.0",
@@ -674,7 +674,7 @@ Future: integrate with a flag provider (e.g. LaunchDarkly, config file) and surf
 
 #### Endpoints
 
-??? details '/metrics'
+??? details "/metrics"
     #### GET
 
     ```json

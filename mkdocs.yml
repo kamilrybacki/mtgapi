@@ -51,6 +51,8 @@ markdown_extensions:
   - attr_list
   - def_list
   - md_in_html
+  - pymdownx.details
+  - pymdownx.superfences
 plugins:
   - search
 extra:

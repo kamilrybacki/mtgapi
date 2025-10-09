@@ -75,7 +75,7 @@ def _per_path_blocks(spec: dict[str, Any]) -> str:
             op_lines.append("    ```json")
             op_lines.extend(["    " + line for line in snippet.splitlines()])
             op_lines.append("    ```\n")
-    blocks.append("\n".join([f"??? details '{route}'", *op_lines]))
+    blocks.append("\n".join([f'??? details "{route}"', *op_lines]))
     return "\n\n".join(blocks)
 
 
@@ -88,7 +88,7 @@ def main() -> None:  # pragma: no cover - thin wrapper
         "Generated OpenAPI documentation. Do not edit within markers; run scripts/update_openapi_markdown.py instead.\n\n"
         f"{summary}\n\n"
         "#### Full Specification\n\n"
-        "???+ note 'Complete OpenAPI JSON'\n"
+        '???+ note "Complete OpenAPI JSON"\n'
         "    ```json\n" + "\n".join([f"    {line}" for line in full_json.splitlines()]) + "\n    ```\n\n"
         "#### Endpoints\n\n"
         f"{per_path}\n"

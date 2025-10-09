@@ -26,7 +26,7 @@ Generated schema documentation. Do not edit within markers; run scripts/update_s
 
 ### Mana Value
 
-???+ note 'Mana Value JSON Schema'
+???+ note "Mana Value JSON Schema"
     ```json
     {
       "description": "Represents the mana value of a Magic: The Gathering card.",
@@ -88,7 +88,7 @@ Generated schema documentation. Do not edit within markers; run scripts/update_s
 
 ### MTG Card
 
-???+ note 'MTG Card JSON Schema'
+???+ note "MTG Card JSON Schema"
     ```json
     {
       "$defs": {
@@ -537,7 +537,7 @@ Generated schema documentation. Do not edit within markers; run scripts/update_s
 
 ### MTGio Card
 
-???+ note 'MTGio Card JSON Schema'
+???+ note "MTGio Card JSON Schema"
     ```json
     {
       "$defs": {
