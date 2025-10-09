@@ -137,6 +137,13 @@ tasks:
         $POETRY_CMD run python scripts/update_openapi_markdown.py
       - task: docs-build
 
+  verify-docs-embeds:
+    desc: Ensure embedded schemas/openapi in markdown are current
+    cmds:
+      - |
+        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+        $POETRY_CMD run python scripts/check_docs_embeddings.py
+
   docs-serve:
     desc: Serve MkDocs with live reload
     cmds:

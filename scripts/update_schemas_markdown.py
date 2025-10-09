@@ -42,11 +42,31 @@ def _summary_table(schema_paths: list[Path]) -> str:
 
 
 def _schema_blocks(schema_paths: list[Path]) -> str:
+    """
+    Return markdown blocks for each schema wrapped in a collapsible details section.
+
+    Uses Material for MkDocs 'details' admonition syntax (expanded by default) so
+    large JSON documents don't dominate the page while still being indexable.
+    """
     blocks: list[str] = []
     for p in schema_paths:
         model_name = _model_name_from_filename(p)
         json_text = json.dumps(json.loads(p.read_text("utf-8")), indent=2, ensure_ascii=False)
-        blocks.append(f"### {model_name}\n\n```json\n{json_text}\n```\n")
+        # Using ???+ note will create an expanded collapsible block; users can collapse.
+        blocks.append(
+            "\n".join(
+                [
+                    f"### {model_name}",
+                    "",
+                    f"???+ note '{model_name} JSON Schema'",
+                    "    ```json",
+                    # Indent the JSON lines under the details block (4 spaces) to nest correctly.
+                    *[f"    {line}" for line in json_text.splitlines()],
+                    "    ```",
+                    "",
+                ]
+            )
+        )
     return "\n".join(blocks)
 
 

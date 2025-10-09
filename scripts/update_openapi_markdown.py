@@ -58,15 +58,40 @@ def _inject(content: str, replacement: str) -> str:
     return pattern.sub(f"{BEGIN_MARK}\n{replacement}\n{END_MARK}", content)
 
 
+def _per_path_blocks(spec: dict[str, Any]) -> str:
+    """
+    Render each path and its operations inside a collapsible block.
+
+    Keeps the page scannable while still exposing structured JSON for each endpoint.
+    """
+    paths = spec.get("paths", {})
+    blocks: list[str] = []
+    for route, operations in sorted(paths.items()):  # noqa: B007 (route used in f-string below)
+        # operations is a dict like {"get": {...}, "post": {...}}
+        op_lines: list[str] = []
+        for method, op_spec in sorted(operations.items()):
+            snippet = json.dumps(op_spec, indent=2, ensure_ascii=False)
+            op_lines.append("    " + f"#### {method.upper()}\n")
+            op_lines.append("    ```json")
+            op_lines.extend(["    " + line for line in snippet.splitlines()])
+            op_lines.append("    ```\n")
+    blocks.append("\n".join([f"??? details '{route}'", *op_lines]))
+    return "\n\n".join(blocks)
+
+
 def main() -> None:  # pragma: no cover - thin wrapper
     spec = _load_spec()
     summary = _summarize(spec)
     full_json = json.dumps(spec, indent=2, ensure_ascii=False)
+    per_path = _per_path_blocks(spec)
     generated = (
         "Generated OpenAPI documentation. Do not edit within markers; run scripts/update_openapi_markdown.py instead.\n\n"
         f"{summary}\n\n"
         "#### Full Specification\n\n"
-        f"```json\n{full_json}\n```\n"
+        "???+ note 'Complete OpenAPI JSON'\n"
+        "    ```json\n" + "\n".join([f"    {line}" for line in full_json.splitlines()]) + "\n    ```\n\n"
+        "#### Endpoints\n\n"
+        f"{per_path}\n"
     )
     original = TARGET_MD.read_text("utf-8")
     updated = _inject(original, generated)

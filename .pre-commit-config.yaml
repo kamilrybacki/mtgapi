@@ -62,3 +62,10 @@ repos:
         pass_filenames: false
         stages: [manual]
         description: "Verifies lockfile is up-to-date (supply-chain integrity)."
+      - id: verify-docs-embeds
+        name: verify embedded docs freshness
+        entry: bash -c 'task verify-docs-embeds'
+        language: system
+        pass_filenames: false
+        stages: [manual]
+        description: "Ensures schemas/openapi embedded markdown blocks are current."
