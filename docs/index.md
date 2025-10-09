@@ -8,7 +8,7 @@ This service provides structured, cached access to Magic: The Gathering card dat
 
 ## Quick Links
 
-- [Architecture](architecture.md)
-- [Configuration](configuration.md)
-- [API Usage](api.md)
-- [Development](development.md)
+- [Architecture](concepts/architecture.md)
+- [Configuration](reference/configuration.md)
+- [API Usage](reference/api.md)
+- [Development](guides/development.md)

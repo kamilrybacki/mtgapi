@@ -21,7 +21,6 @@ nav:
     - Configuration: reference/configuration.md
     - API Usage: reference/api.md
     - Schemas: reference/schemas.md
-    - OpenAPI: reference/openapi.md
 
 theme:
   name: material
