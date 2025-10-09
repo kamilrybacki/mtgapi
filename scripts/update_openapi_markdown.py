@@ -66,7 +66,7 @@ def _per_path_blocks(spec: dict[str, Any]) -> str:
     """
     paths = spec.get("paths", {})
     blocks: list[str] = []
-    for route, operations in sorted(paths.items()):  # noqa: B007 (route used in f-string below)
+    for route, operations in sorted(paths.items()):
         # operations is a dict like {"get": {...}, "post": {...}}
         op_lines: list[str] = []
         for method, op_spec in sorted(operations.items()):
@@ -75,7 +75,7 @@ def _per_path_blocks(spec: dict[str, Any]) -> str:
             op_lines.append("    ```json")
             op_lines.extend(["    " + line for line in snippet.splitlines()])
             op_lines.append("    ```\n")
-    blocks.append("\n".join([f'??? details "{route}"', *op_lines]))
+        blocks.append("\n".join([f'??? details "{route}"', *op_lines]))
     return "\n\n".join(blocks)
 
 
