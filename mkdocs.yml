@@ -6,19 +6,22 @@ repo_name: kamilrybacki/mtgcobuilder-api
 edit_uri: edit/main/docs/
 nav:
   - Home: index.md
-  - Architecture: architecture.md
-  - Configuration: configuration.md
-  - API Usage: api.md
-  - Development: development.md
-  - Domain Models: domain-models.md
-  - Services: services.md
-  - Caching: caching.md
-  - Testing Strategy: testing-strategy.md
-  - Operations: operations.md
-  - Metrics & Tracing: metrics-tracing.md
-  - Feature Flags: feature-flags.md
-  - Schemas: schemas.md
-  - OpenAPI: openapi.md
+  - Concepts:
+    - Architecture: concepts/architecture.md
+    - Domain Models: concepts/domain-models.md
+    - Services: concepts/services.md
+    - Caching: concepts/caching.md
+    - Metrics & Tracing: concepts/metrics-tracing.md
+    - Feature Flags: concepts/feature-flags.md
+  - Guides:
+    - Development: guides/development.md
+    - Operations: guides/operations.md
+    - Testing Strategy: guides/testing-strategy.md
+  - Reference:
+    - Configuration: reference/configuration.md
+    - API Usage: reference/api.md
+    - Schemas: reference/schemas.md
+    - OpenAPI: reference/openapi.md
 
 theme:
   name: material
@@ -50,7 +53,6 @@ markdown_extensions:
   - md_in_html
 plugins:
   - search
-  - include-markdown
 extra:
   version:
     provider: markdown

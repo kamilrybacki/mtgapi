@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 SCHEMAS_DIR = ROOT / "docs" / "_generated_schemas"
-TARGET_MD = ROOT / "docs" / "schemas.md"
+TARGET_MD = ROOT / "docs" / "reference" / "schemas.md"
 BEGIN_MARK = "<!-- SCHEMAS:BEGIN -->"
 END_MARK = "<!-- SCHEMAS:END -->"
 

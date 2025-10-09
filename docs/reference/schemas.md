@@ -7,7 +7,6 @@ Generation pipeline:
 1. `scripts/export_schemas.py` writes raw schema JSON into `docs/_generated_schemas/*.schema.json`.
 2. `scripts/update_schemas_markdown.py` embeds those schemas below.
 
-
 Regenerate locally:
 
 ```bash
@@ -765,11 +764,24 @@ Generated schema documentation. Do not edit within markers; run scripts/update_s
         "double-faced",
         "token",
         "plane",
-        # Schemas (Moved)
-
-        Moved to `reference/schemas.md`.
-
-        This file remains as a stub for backward compatibility and deep links.
+        "scheme",
+        "phenomenon",
+        "leveler",
+        "vanguard",
+        "aftermath"
+      ],
+      "maxLength": 12,
+      "minLength": 1,
+      "title": "Layout",
+      "type": "string"
+    },
+    "rulings": {
+      "description": "List of rulings for the card",
+      "items": {
+        "$ref": "#/$defs/MTGCardRuling"
+      },
+      "title": "Rulings",
+      "type": "array"
     },
     "foreign_names": {
       "description": "List of foreign names for the card",
@@ -830,5 +842,3 @@ Generated schema documentation. Do not edit within markers; run scripts/update_s
 ```
 
 <!-- SCHEMAS:END -->
-
-> Do not manually edit within the markers above.

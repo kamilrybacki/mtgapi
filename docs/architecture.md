@@ -1,4 +1,8 @@
-# Architecture
+# Architecture (Moved)
+
+Moved to `concepts/architecture.md`.
+
+See new Concepts section.
 
 ```text
 FastAPI (entrypoint) -> Services (DI) -> { Cache | Postgres | External APIs }

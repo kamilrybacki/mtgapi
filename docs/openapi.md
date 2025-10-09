@@ -1,11 +1,5 @@
-# OpenAPI Schema
+# OpenAPI (Moved)
 
-The OpenAPI specification generated from the live FastAPI application. Regenerate with:
+Moved to `reference/openapi.md`.
 
-```bash
-poetry run python scripts/export_openapi.py
-```
-
-```json
---8<-- "_generated_openapi/openapi.json"
-```
+This file remains as a stub for backward compatibility and deep links.

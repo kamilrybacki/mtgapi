@@ -1,0 +1,303 @@
+{
+  "$defs": {
+    "MTGCardAlias": {
+      "description": "Represents a foreign name for a Magic: The Gathering card.",
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "language": {
+          "title": "Language",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "language"
+      ],
+      "title": "MTGCardAlias",
+      "type": "object"
+    },
+    "MTGCardRuling": {
+      "description": "Represents a ruling for a Magic: The Gathering card.",
+      "properties": {
+        "date": {
+          "title": "Date",
+          "type": "string"
+        },
+        "text": {
+          "title": "Text",
+          "type": "string"
+        }
+      },
+      "required": [
+        "date",
+        "text"
+      ],
+      "title": "MTGCardRuling",
+      "type": "object"
+    }
+  },
+  "description": "Represents a Magic: The Gathering card with additional fields for MTGIO.",
+  "properties": {
+    "names": {
+      "description": "List of names the card can have",
+      "examples": [
+        [
+          "Lightning Bolt"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Names",
+      "type": "array"
+    },
+    "mana_cost": {
+      "description": "Mana cost of the card in {X}({C}*) format",
+      "examples": [
+        "{3}{W}{U}"
+      ],
+      "title": "Mana Cost",
+      "type": "string"
+    },
+    "colors": {
+      "description": "List of colors the card belongs to",
+      "examples": [
+        [
+          "Red"
+        ],
+        [
+          "Blue",
+          "Red"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Colors",
+      "type": "array"
+    },
+    "color_identity": {
+      "description": "List of colors that define the card's identity (color codes, e.g. ['R', 'U'])",
+      "examples": [
+        [
+          "R"
+        ],
+        [
+          "R",
+          "U"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Color Identity",
+      "type": "array"
+    },
+    "rarity": {
+      "default": "common",
+      "description": "Rarity of the card (e.g., common, uncommon, rare, mythic)",
+      "examples": [
+        "common",
+        "uncommon",
+        "rare",
+        "mythic"
+      ],
+      "maxLength": 10,
+      "minLength": 1,
+      "title": "Rarity",
+      "type": "string"
+    },
+    "types": {
+      "description": "List of types the card belongs to (e.g. Creature, Instant, Sorcery, Artifact, Enchantment, Land, Planeswalker)",
+      "examples": [
+        [
+          "Creature"
+        ],
+        [
+          "Instant"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Types",
+      "type": "array"
+    },
+    "subtypes": {
+      "description": "List of subtypes the card belongs to (e.g. Human, Wizard, Squirrel)",
+      "examples": [
+        [
+          "Human"
+        ],
+        [
+          "Rat",
+          "Squirrel"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Subtypes",
+      "type": "array"
+    },
+    "supertypes": {
+      "description": "List of supertypes the card belongs to (e.g. Basic, Legendary, Snow, World, Ongoing)",
+      "examples": [
+        [
+          "Legendary"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Supertypes",
+      "type": "array"
+    },
+    "text": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Oracle text of the card. May contain mana symbols and other symbols.",
+      "examples": [
+        "Flying, Vigilance"
+      ],
+      "title": "Text"
+    },
+    "flavor": {
+      "default": "",
+      "description": "Flavor text of the card, if any",
+      "examples": [
+        "\"The storm is coming.\""
+      ],
+      "title": "Flavor",
+      "type": "string"
+    },
+    "power": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Power of the creature card (e.g. '3', 'X')",
+      "examples": [
+        "3",
+        "X"
+      ],
+      "title": "Power"
+    },
+    "toughness": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Toughness of the creature card (e.g. '3', 'X')",
+      "examples": [
+        "3",
+        "X"
+      ],
+      "title": "Toughness"
+    },
+    "layout": {
+      "default": "normal",
+      "description": "Layout of the card (e.g., normal, split, flip, double-faced, token, plane, scheme, phenomenon, leveler, vanguard, aftermath)",
+      "examples": [
+        "normal",
+        "split",
+        "flip",
+        "double-faced",
+        "token",
+        "plane",
+        "scheme",
+        "phenomenon",
+        "leveler",
+        "vanguard",
+        "aftermath"
+      ],
+      "maxLength": 12,
+      "minLength": 1,
+      "title": "Layout",
+      "type": "string"
+    },
+    "rulings": {
+      "description": "List of rulings for the card",
+      "items": {
+        "$ref": "#/$defs/MTGCardRuling"
+      },
+      "title": "Rulings",
+      "type": "array"
+    },
+    "foreign_names": {
+      "description": "List of foreign names for the card",
+      "items": {
+        "$ref": "#/$defs/MTGCardAlias"
+      },
+      "title": "Foreign Names",
+      "type": "array"
+    },
+    "printings": {
+      "description": "List of sets the card has been printed in",
+      "examples": [
+        [
+          "LEA",
+          "2ED"
+        ]
+      ],
+      "items": {
+        "type": "string"
+      },
+      "title": "Printings",
+      "type": "array"
+    },
+    "id": {
+      "description": "Unique identifier for the card in the MTGIO database (SHA1 hash of setCode + cardName + cardImageName)",
+      "examples": [
+        "a1b2c3d4e5f6g7h8i9j0"
+      ],
+      "title": "Id",
+      "type": "string"
+    },
+    "multiverse_id": {
+      "default": "",
+      "description": "Multiverse ID of the card, if available",
+      "examples": [
+        "123456"
+      ],
+      "title": "Multiverse Id",
+      "type": "string"
+    },
+    "image_url": {
+      "description": "URL to the card's image in the MTGIO database",
+      "examples": [
+        "http://example.com/image.jpg"
+      ],
+      "title": "Image Url",
+      "type": "string"
+    }
+  },
+  "required": [
+    "mana_cost",
+    "id",
+    "image_url"
+  ],
+  "title": "MTGIOCard",
+  "type": "object"
+}

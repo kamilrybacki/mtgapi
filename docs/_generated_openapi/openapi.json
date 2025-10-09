@@ -1,0 +1,632 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "MTG API",
+    "version": "v1"
+  },
+  "paths": {
+    "/card/{card_identifier}": {
+      "get": {
+        "summary": "Get Card",
+        "operationId": "get_card_card__card_identifier__get",
+        "parameters": [
+          {
+            "name": "card_identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Card Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MTGCard"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/card/{card_identifier}/image": {
+      "get": {
+        "summary": "Get Card Image",
+        "operationId": "get_card_image_card__card_identifier__image_get",
+        "parameters": [
+          {
+            "name": "card_identifier",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Card Identifier"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "tags": [
+          "_internal"
+        ],
+        "summary": "Metrics (placeholder)",
+        "description": "Placeholder metrics endpoint.\n\nReturns 501 until metrics collection (Prometheus / OTEL) is implemented.",
+        "operationId": "metrics_placeholder_metrics_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/_trace/test": {
+      "get": {
+        "tags": [
+          "_internal"
+        ],
+        "summary": "Tracing probe (placeholder)",
+        "description": "Placeholder trace test endpoint.\n\nWill emit a span once tracing is wired. Useful for validating exporter config.",
+        "operationId": "tracing_probe_placeholder__trace_test_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/feature-flags": {
+      "get": {
+        "tags": [
+          "_internal"
+        ],
+        "summary": "Feature flags (placeholder)",
+        "description": "Placeholder feature flags listing.\n\nFuture: integrate with a flag provider (e.g. LaunchDarkly, config file) and surface active flags.",
+        "operationId": "feature_flags_placeholder_feature_flags_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "Keyword": {
+        "type": "string",
+        "enum": [
+          "Deathtouch",
+          "Defender",
+          "Double Strike",
+          "Enchant",
+          "Equip",
+          "First Strike",
+          "Flash",
+          "Flying",
+          "Haste",
+          "Hexproof",
+          "Indestructible",
+          "Intimidate",
+          "Forestwalk",
+          "Islandwalk",
+          "Mountainwalk",
+          "Plainswalk",
+          "Swampwalk",
+          "Lifelink",
+          "Protection",
+          "Reach",
+          "Shroud",
+          "Trample",
+          "Vigilance",
+          "Ward",
+          "Banding",
+          "Rampage",
+          "Cumulative Upkeep",
+          "Flanking",
+          "Phasing",
+          "Buyback",
+          "Shadow",
+          "Cycling",
+          "Echo",
+          "Horsemanship",
+          "Fading",
+          "Kicker",
+          "Flashback",
+          "Madness",
+          "Fear",
+          "Morph",
+          "Amplify",
+          "Provoke",
+          "Storm",
+          "Affinity",
+          "Entwine",
+          "Modular",
+          "Sunburst",
+          "Bushido",
+          "Soulshift",
+          "Splice",
+          "Offering",
+          "Ninjutsu",
+          "Epic",
+          "Convoke",
+          "Dredge",
+          "Transmute",
+          "Bloodthirst",
+          "Haunt",
+          "Replicate",
+          "Forecast",
+          "Graft",
+          "Recover",
+          "Ripple",
+          "Split Second",
+          "Suspend",
+          "Vanishing",
+          "Absorb",
+          "Aura Swap",
+          "Delve",
+          "Fortify",
+          "Frenzy",
+          "Gravestorm",
+          "Poisonous",
+          "Transfigure",
+          "Champion",
+          "Changeling",
+          "Evoke",
+          "Hideaway",
+          "Prowl",
+          "Reinforce",
+          "Conspire",
+          "Persist",
+          "Wither",
+          "Retrace",
+          "Devour",
+          "Exalted",
+          "Unearth",
+          "Cascade",
+          "Annihilator",
+          "Level Up",
+          "Rebound",
+          "Umbra Armor",
+          "Infect",
+          "Battle Cry",
+          "Living Weapon",
+          "Undying",
+          "Miracle",
+          "Soulbond",
+          "Overload",
+          "Scavenge",
+          "Unleash",
+          "Cipher",
+          "Evolve",
+          "Extort",
+          "Fuse",
+          "Bestow",
+          "Tribute",
+          "Dethrone",
+          "Hidden Agenda",
+          "Outlast",
+          "Prowess",
+          "Dash",
+          "Exploit",
+          "Menace",
+          "Renown",
+          "Awaken",
+          "Devoid",
+          "Ingest",
+          "Myriad",
+          "Surge",
+          "Skulk",
+          "Emerge",
+          "Escalate",
+          "Melee",
+          "Crew",
+          "Fabricate",
+          "Partner",
+          "Undaunted",
+          "Improvise",
+          "Aftermath",
+          "Embalm",
+          "Eternalize",
+          "Afflict",
+          "Ascend",
+          "Assist",
+          "Jump-Start",
+          "Mentor",
+          "Afterlife",
+          "Riot",
+          "Spectacle",
+          "Escape",
+          "Companion",
+          "Mutate",
+          "Encore",
+          "Boast",
+          "Foretell",
+          "Demonstrate",
+          "Daybound and Nightbound",
+          "Disturb",
+          "Decayed",
+          "Cleave",
+          "Training",
+          "Compleated",
+          "Reconfigure",
+          "Blitz",
+          "Casualty",
+          "Enlist",
+          "Read Ahead",
+          "Ravenous",
+          "Squad",
+          "Space Sculptor",
+          "Visit",
+          "Prototype",
+          "Living Metal",
+          "More Than Meets the Eye",
+          "For Mirrodin!",
+          "Toxic",
+          "Backup",
+          "Bargain",
+          "Craft",
+          "Disguise",
+          "Solved",
+          "Plot",
+          "Saddle",
+          "Spree",
+          "Freerunning",
+          "Gift",
+          "Offspring",
+          "Impending",
+          "Exhaust",
+          "Max Speed",
+          "Start Your Engines!",
+          "Harmonize",
+          "Mobilize"
+        ],
+        "title": "Keyword",
+        "description": "Enumeration for different types of counters that can be on a Magic: The Gathering card."
+      },
+      "MTGCard": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Unique identifier for the card"
+          },
+          "multiverse_id": {
+            "type": "string",
+            "title": "Multiverse Id",
+            "description": "Multiverse ID of the card, if available"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Name of the card"
+          },
+          "aliases": {
+            "items": {
+              "$ref": "#/components/schemas/MTGCardAlias"
+            },
+            "type": "array",
+            "title": "Aliases",
+            "description": "List of foreign names for the card"
+          },
+          "rulings": {
+            "items": {
+              "$ref": "#/components/schemas/MTGCardRuling"
+            },
+            "type": "array",
+            "title": "Rulings",
+            "description": "List of rulings for the card"
+          },
+          "mana_value": {
+            "$ref": "#/components/schemas/ManaValue",
+            "description": "Mana value of the card"
+          },
+          "types": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Types",
+            "description": "List of types the card belongs to"
+          },
+          "subtypes": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Subtypes",
+            "description": "List of subtypes the card belongs to"
+          },
+          "keywords": {
+            "items": {
+              "$ref": "#/components/schemas/Keyword"
+            },
+            "type": "array",
+            "title": "Keywords",
+            "description": "List of counters on the card"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text",
+            "description": "Text on the card, such as rules text or abilities",
+            "default": ""
+          },
+          "flavor": {
+            "type": "string",
+            "title": "Flavor",
+            "description": "Flavor text of the card, if any",
+            "default": ""
+          },
+          "power": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Power",
+            "description": "Power of the creature card"
+          },
+          "toughness": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Toughness",
+            "description": "Toughness of the creature card"
+          },
+          "rarity": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rarity",
+            "description": "Rarity of the card"
+          },
+          "set_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Set Name",
+            "description": "Set name where the card belongs"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url",
+            "description": "URL to the card's image",
+            "default": ""
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "multiverse_id",
+          "name",
+          "mana_value"
+        ],
+        "title": "MTGCard",
+        "description": "Represents a Magic: The Gathering card."
+      },
+      "MTGCardAlias": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "language": {
+            "type": "string",
+            "title": "Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "language"
+        ],
+        "title": "MTGCardAlias",
+        "description": "Represents a foreign name for a Magic: The Gathering card."
+      },
+      "MTGCardRuling": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "title": "Date"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "text"
+        ],
+        "title": "MTGCardRuling",
+        "description": "Represents a ruling for a Magic: The Gathering card."
+      },
+      "ManaValue": {
+        "properties": {
+          "generic": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Generic",
+            "description": "Generic mana cost",
+            "default": 0
+          },
+          "colorless": {
+            "type": "integer",
+            "title": "Colorless",
+            "description": "Colorless mana cost",
+            "default": 0
+          },
+          "white": {
+            "type": "integer",
+            "title": "White",
+            "description": "White mana cost",
+            "default": 0
+          },
+          "blue": {
+            "type": "integer",
+            "title": "Blue",
+            "description": "Blue mana cost",
+            "default": 0
+          },
+          "black": {
+            "type": "integer",
+            "title": "Black",
+            "description": "Black mana cost",
+            "default": 0
+          },
+          "red": {
+            "type": "integer",
+            "title": "Red",
+            "description": "Red mana cost",
+            "default": 0
+          },
+          "green": {
+            "type": "integer",
+            "title": "Green",
+            "description": "Green mana cost",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "title": "ManaValue",
+        "description": "Represents the mana value of a Magic: The Gathering card."
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
