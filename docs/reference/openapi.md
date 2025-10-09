@@ -30,7 +30,7 @@ Component schemas: **7**
 
 #### Full Specification
 
-???+ note "Complete OpenAPI JSON"
+???+ note 'Complete OpenAPI JSON'
     ```json
     {
       "openapi": "3.1.0",
@@ -674,147 +674,7 @@ Future: integrate with a flag provider (e.g. LaunchDarkly, config file) and surf
 
 #### Endpoints
 
-??? details "/_trace/test"
-    #### GET
-
-    ```json
-    {
-      "tags": [
-        "_internal"
-      ],
-      "summary": "Tracing probe (placeholder)",
-      "description": "Placeholder trace test endpoint.
-
-Will emit a span once tracing is wired. Useful for validating exporter config.",
-      "operationId": "tracing_probe_placeholder__trace_test_get",
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        }
-      }
-    }
-    ```
-
-
-??? details "/card/{card_identifier}"
-    #### GET
-
-    ```json
-    {
-      "summary": "Get Card",
-      "operationId": "get_card_card__card_identifier__get",
-      "parameters": [
-        {
-          "name": "card_identifier",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "title": "Card Identifier"
-          }
-        }
-      ],
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MTGCard"
-              }
-            }
-          }
-        },
-        "422": {
-          "description": "Validation Error",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HTTPValidationError"
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-
-
-??? details "/card/{card_identifier}/image"
-    #### GET
-
-    ```json
-    {
-      "summary": "Get Card Image",
-      "operationId": "get_card_image_card__card_identifier__image_get",
-      "parameters": [
-        {
-          "name": "card_identifier",
-          "in": "path",
-          "required": true,
-          "schema": {
-            "type": "string",
-            "title": "Card Identifier"
-          }
-        }
-      ],
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        },
-        "422": {
-          "description": "Validation Error",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/HTTPValidationError"
-              }
-            }
-          }
-        }
-      }
-    }
-    ```
-
-
-??? details "/feature-flags"
-    #### GET
-
-    ```json
-    {
-      "tags": [
-        "_internal"
-      ],
-      "summary": "Feature flags (placeholder)",
-      "description": "Placeholder feature flags listing.
-
-Future: integrate with a flag provider (e.g. LaunchDarkly, config file) and surface active flags.",
-      "operationId": "feature_flags_placeholder_feature_flags_get",
-      "responses": {
-        "200": {
-          "description": "Successful Response",
-          "content": {
-            "application/json": {
-              "schema": {}
-            }
-          }
-        }
-      }
-    }
-    ```
-
-
-??? details "/metrics"
+??? details '/metrics'
     #### GET
 
     ```json
