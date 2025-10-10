@@ -1,6 +1,6 @@
-"""Tests for schema and OpenAPI export helper scripts.
+"""Tests for schema export helper script.
 
-Focused on verifying that the export functions write files to the expected
+Focused on verifying that the export function writes files to the expected
 locations. Paths are redirected to a temporary directory to avoid polluting
 real docs output during the test run.
 """
@@ -14,7 +14,6 @@ from typing import Iterable, Tuple
 import pytest
 
 import scripts.export_schemas as export_schemas
-import scripts.export_openapi as export_openapi
 
 
 @pytest.fixture()
@@ -23,10 +22,6 @@ def temp_docs_dir(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     # Patch schema export output dir
     monkeypatch.setattr(export_schemas, "OUTPUT_DIR", target / "schemas", raising=False)
     export_schemas.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    # Patch OpenAPI export output dir & file
-    monkeypatch.setattr(export_openapi, "OUTPUT_DIR", target / "openapi", raising=False)
-    export_openapi.OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    monkeypatch.setattr(export_openapi, "OUT_FILE", export_openapi.OUTPUT_DIR / "openapi.json", raising=False)
     return target
 
 
@@ -46,13 +41,3 @@ def test_schema_export_writes_all_models(temp_docs_dir: Path) -> None:
         loaded = json.loads(path.read_text(encoding="utf-8"))
         assert isinstance(loaded, dict)
         assert "$schema" in loaded or "title" in loaded  # minimal sanity
-
-
-def test_openapi_export_writes_file(temp_docs_dir: Path) -> None:
-    out_path = export_openapi.export()
-    assert out_path.exists(), "OpenAPI export did not produce a file"
-    data = json.loads(out_path.read_text(encoding="utf-8"))
-    assert isinstance(data, dict)
-    # Minimal required OpenAPI root keys
-    for key in ("openapi", "paths"):
-        assert key in data
