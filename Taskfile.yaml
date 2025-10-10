@@ -127,14 +127,12 @@ tasks:
         $POETRY_CMD run mkdocs build --strict
 
   docs-refresh:
-    desc: Export schemas & OpenAPI then build docs
+    desc: Export schemas then build docs
     cmds:
       - task: export-schemas
-      - task: export-openapi
       - |
         POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
         $POETRY_CMD run python scripts/update_schemas_markdown.py
-        $POETRY_CMD run python scripts/update_openapi_markdown.py
       - task: docs-build
 
   verify-docs-embeds:
@@ -192,13 +190,6 @@ tasks:
       - |
         POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
         $POETRY_CMD run python scripts/export_schemas.py
-
-  export-openapi:
-    desc: Export OpenAPI schema to docs/_generated_openapi
-    cmds:
-      - |
-        POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
-        $POETRY_CMD run python scripts/export_openapi.py
 
   enable-pre-commit:
     desc: Install pre-commit hooks locally

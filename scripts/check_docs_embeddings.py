@@ -1,9 +1,9 @@
 """
-Check that embedded schema and OpenAPI markdown sections are up to date.
+Check that embedded schema markdown sections are up to date.
 
 Process:
-1. Run export tasks (schemas + openapi) to generate fresh JSON artifacts.
-2. Run embedding scripts to update markdown in-place.
+1. Run export task (schemas) to generate fresh JSON artifacts.
+2. Run embedding script to update markdown in-place.
 3. Use git to detect working tree changes. If any tracked docs/reference/*.md changed, exit 1.
 
 Intended usage: CI guard / local pre-commit sanity.
@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).parent.parent
 DOCS_REF = ROOT / "docs" / "reference"
-TARGET_FILES = [DOCS_REF / "schemas.md", DOCS_REF / "openapi.md"]
+TARGET_FILES = [DOCS_REF / "schemas.md"]
 
 
 def _run(cmd: list[str]) -> None:
@@ -34,9 +34,7 @@ def _run(cmd: list[str]) -> None:
 def main() -> int:
     # Step 1/2: regenerate artifacts + embeddings
     _run([sys.executable, "scripts/export_schemas.py"])
-    _run([sys.executable, "scripts/export_openapi.py"])
     _run([sys.executable, "scripts/update_schemas_markdown.py"])
-    _run([sys.executable, "scripts/update_openapi_markdown.py"])
 
     # Step 3: git diff --quiet on target files; if diff present -> failure
     changed = False
