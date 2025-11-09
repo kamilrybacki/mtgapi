@@ -130,6 +130,7 @@ asyncio_default_fixture_loop_scope = "session"
 markers = [
     "offline: tests that can be carried out offline",
     "chosen: helper marker for running only chosen tests with `test-chosen` command",
+    "docker: tests that require a local Docker daemon",
 ]
 
 [tool.coverage.run]
