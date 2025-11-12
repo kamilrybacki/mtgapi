@@ -18,13 +18,19 @@ tasks:
   install-dev:
     desc: Install development dependencies
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} lock"
-      - "{{.FULL_PACKAGER_COMMAND}} install --all-groups"
+      - |
+          POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+          $POETRY_CMD lock
+      - |
+          POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+          $POETRY_CMD install --all-groups
 
   install-prod:
     desc: Install production dependencies
     cmds:
-      - "{{.FULL_PACKAGER_COMMAND}} install --no-dev"
+      - |
+          POETRY_CMD=$({{.FULL_PACKAGER_COMMAND}})
+          $POETRY_CMD install --no-dev
 
   initialize-venv:
     desc: Initialize the virtual environment
