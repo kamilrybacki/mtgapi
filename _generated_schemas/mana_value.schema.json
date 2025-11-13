@@ -1,0 +1,56 @@
+{
+  "description": "Represents the mana value of a Magic: The Gathering card.",
+  "properties": {
+    "generic": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "string"
+        }
+      ],
+      "default": 0,
+      "description": "Generic mana cost",
+      "title": "Generic"
+    },
+    "colorless": {
+      "default": 0,
+      "description": "Colorless mana cost",
+      "title": "Colorless",
+      "type": "integer"
+    },
+    "white": {
+      "default": 0,
+      "description": "White mana cost",
+      "title": "White",
+      "type": "integer"
+    },
+    "blue": {
+      "default": 0,
+      "description": "Blue mana cost",
+      "title": "Blue",
+      "type": "integer"
+    },
+    "black": {
+      "default": 0,
+      "description": "Black mana cost",
+      "title": "Black",
+      "type": "integer"
+    },
+    "red": {
+      "default": 0,
+      "description": "Red mana cost",
+      "title": "Red",
+      "type": "integer"
+    },
+    "green": {
+      "default": 0,
+      "description": "Green mana cost",
+      "title": "Green",
+      "type": "integer"
+    }
+  },
+  "title": "ManaValue",
+  "type": "object"
+}
