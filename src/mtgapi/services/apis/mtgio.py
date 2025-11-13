@@ -37,25 +37,54 @@ class MTGIOAPIService(AbstractAsyncHTTPClientService, config=MTGIOAPIConfigurati
         """
         return re.sub(r"(?<!^)(?=[A-Z])", "_", key).lower()
 
-    async def get_card(self, identifier: str | int, raw: bool = False) -> MTGIOCard:
+    async def get_card(self, identifier: str | int, printing: str | None = None, raw: bool = False) -> MTGIOCard:
         """
         Fetches a card by its identifier (name or ID) from the MTGIO API.
+
+        :param identifier:
+            The card name or multiverse ID used for lookup.
+        :param printing:
+            Optional set code (e.g. "10E") to restrict name-based lookups to a specific printing.
+        :param raw:
+            When True, return the raw MTGIO payload instead of an MTGIOCard model.
         """
         fetch_by_name = isinstance(identifier, str) and not identifier.isdigit()
-        url_query_part = "?name=" if fetch_by_name else "/"
+        normalized_printing = printing.strip().upper() if isinstance(printing, str) and printing.strip() else None
 
         if fetch_by_name:
-            identifier = (
-                f'"{urllib.parse.quote_plus(str(identifier))}"'
-                if all(c.isalnum() or c.isspace() for c in str(identifier))
-                else identifier
+            name_value = str(identifier)
+            quoted_name = f'"{name_value}"' if all(c.isalnum() or c.isspace() for c in name_value) else name_value
+            query_params = {"name": quoted_name}
+            if normalized_printing:
+                query_params["set"] = normalized_printing
+            raw_url = (
+                f"/{self.version}/{MTGIOAPIConfiguration.APIEndpoints.CARDS}?"
+                f"{urllib.parse.urlencode(query_params, quote_via=urllib.parse.quote_plus)}"
             )
+        else:
+            raw_url = f"/{self.version}/{MTGIOAPIConfiguration.APIEndpoints.CARDS}/{identifier}"
 
-        raw_url = f"/{self.version}/{MTGIOAPIConfiguration.APIEndpoints.CARDS}{url_query_part}{identifier}"
         response = await self.get(raw_url)
         response.raise_for_status()
         payload = response.json()
-        found_card_data = payload.get("cards", [{}])[0] if fetch_by_name else payload.get("card", {})
+
+        if fetch_by_name:
+            cards_payload = payload.get("cards", [])
+            if not isinstance(cards_payload, list) or not cards_payload:
+                raise ValueError(
+                    f"Card with name '{identifier}' and printing '{normalized_printing or 'ANY'}' not found."
+                )
+
+            if normalized_printing:
+                cards_payload = [card for card in cards_payload if card.get("set", "").upper() == normalized_printing]
+                if not cards_payload:
+                    raise ValueError(f"Card with name '{identifier}' and printing '{normalized_printing}' not found.")
+
+            found_card_data = cards_payload[0]
+        else:
+            found_card_data = payload.get("card", {})
+            if not found_card_data:
+                raise ValueError(f"Card with identifier '{identifier}' not found.")
         card_name = found_card_data.get("name", "")
 
         if not card_name:

@@ -47,6 +47,25 @@ async def test_querying_for_a_card(
 
 
 @pytest.mark.asyncio
+async def test_querying_for_a_card_with_specific_printing(
+    test_mtgio_service: MTGIOAPIService,
+) -> None:
+    card_by_id = await test_mtgio_service.get_card(TEST_MTGIO_CARD_ID)
+    processed_card = MTGCard.from_mtgio_card(card_by_id)
+    printing = processed_card.set_name
+
+    if not printing:
+        pytest.skip("Sample card does not expose a set code to assert against.")
+
+    card_by_name_and_printing = await test_mtgio_service.get_card(processed_card.name, printing=printing)
+    processed_card_by_name = MTGCard.from_mtgio_card(card_by_name_and_printing)
+
+    assert processed_card_by_name.name == processed_card.name
+    assert processed_card_by_name.set_name == processed_card.set_name
+    assert processed_card_by_name.text == processed_card.text
+
+
+@pytest.mark.asyncio
 async def test_querying_for_a_card_with_invalid_id(
     test_mtgio_service: MTGIOAPIService,
 ) -> None:

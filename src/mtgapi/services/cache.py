@@ -11,13 +11,17 @@ logger = logging.getLogger(__name__)
 
 @inject
 async def retrieve_card_data_from_cache(
-    identifier: str, database: PostgresDatabaseService = Provide[AuxiliaryServiceNames.DATABASE]
+    identifier: str,
+    printing: str | None = None,
+    database: PostgresDatabaseService = Provide[AuxiliaryServiceNames.DATABASE],
 ) -> MTGCard:
     """
     Retrieve card data from the cache.
 
     :param identifier:
-        The identifier of the card to retrieve - an integer representing the card ID.
+        The identifier of the card to retrieve. Accepts a multiverse ID or a card name.
+    :param printing:
+        Optional set code for the desired printing. Only applied for name-based lookups.
     :param database:
         The database service to use for retrieving the card data.
     :return:
@@ -25,7 +29,16 @@ async def retrieve_card_data_from_cache(
     """
     await database.register(model=MTGCard)
     try:
-        results = await database.get_objects(object_type=MTGCard, filters={"multiverse_id": identifier})
+        normalized_identifier = identifier.strip()
+        normalized_printing = printing.strip().upper() if isinstance(printing, str) and printing.strip() else None
+        if normalized_identifier.isdigit():
+            lookup_filters = {"multiverse_id": normalized_identifier}
+        else:
+            lookup_filters = {"name": normalized_identifier}
+
+        if normalized_printing:
+            lookup_filters["set_name"] = normalized_printing
+        results = await database.get_objects(object_type=MTGCard, filters=lookup_filters)
         if not results:
             logger.info("No data for id=%s present in cache", identifier)
             return MTGCard.null()
